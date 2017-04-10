@@ -11,4 +11,11 @@
 using namespace std;
 
 
+class Floorplanner {
+    public:
+        Floorplanner() {}
+    private:
+        Chip* _chip;
+};
+
 #endif

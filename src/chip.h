@@ -41,11 +41,12 @@ struct Terminal {
 struct Block {
     Block() {}
     Block(string n = "", int w = 0, int h = 0, 
-        Location loc = make_pair(0, 0)):
-        name(n), width(w), height(h), leftdown(loc) {}
+        bool r = 0, Location loc = make_pair(0, 0)):
+        name(n), width(w), height(h), rotate(r), leftdown(loc) {}
     string      name;
     int         width;
     int         height;
+    bool        rotate;
     Location    leftdown;
     vector<int> nets;
 };

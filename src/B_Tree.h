@@ -13,6 +13,11 @@
 #include "chip.h"
 using namespace std;
 
+class B_Tree {
+    public:
+        B_Tree() {}
+    private:
+};
 
 
 

@@ -17,6 +17,6 @@ int main(int argc, char* argv[])
     string bfile = argv[2];
     string nfile = argv[3];
     Chip c;
-    c.parse(bfile, nfile) ;   
+    c.parse(bfile, nfile) ;
     return 0;
 }

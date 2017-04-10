@@ -69,6 +69,14 @@ void Chip::parseNet(string& nfName)
             for (int i = 0; i < deg; ++i) {
                 nf >> buf;
                 p.push_back(buf);
+                if (_blocksMap[buf]) {
+                    Block* b = _blocks[_blocksMap[buf]];
+                    b->nets.push_back(id);
+                }
+                else if (_terminalsMap[buf]) {
+                    Terminal* t = _terminals[_terminalsMap[buf]];
+                    t->nets.push_back(id);
+                }
             }
             Net* n = new Net(id, deg, p);
             _nets[cnt++] = n;
