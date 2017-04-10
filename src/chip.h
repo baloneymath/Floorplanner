@@ -15,7 +15,7 @@
 #include <algorithm>
 using namespace std;
 
-typedef pair<int, int>              Location;
+typedef pair<double, double>        Location;
 typedef pair<Location, Location>    Rect;
 typedef unordered_map<string, int>  StringIntMap;
 
@@ -43,9 +43,16 @@ struct Block {
     Block(string n = "", int w = 0, int h = 0, 
         bool r = 0, Location loc = make_pair(0, 0)):
         name(n), width(w), height(h), rotate(r), leftdown(loc) {}
+    
+    Location center() {
+        double x = leftdown.first + (rotate? width : height);
+        double y = leftdown.second + (rotate? height : width);
+        return make_pair(x, y);
+    }
+    
     string      name;
-    int         width;
-    int         height;
+    double      width;
+    double      height;
     bool        rotate;
     Location    leftdown;
     vector<int> nets;
@@ -60,8 +67,8 @@ class Chip {
 
     private:
         // Outlines, basic
-        int     _width, _height;
-        int     _nNet, _nBlock, _nTerminal;
+        double  _width, _height;
+        double  _nNet, _nBlock, _nTerminal;
 
         // name map
         StringIntMap    _blocksMap;

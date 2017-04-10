@@ -7,7 +7,7 @@
 #define _FLOORPLANNER_H
 
 #include "chip.h"
-#include "B-Tree.h"
+#include "B_Tree.h"
 using namespace std;
 
 
@@ -15,7 +15,8 @@ class Floorplanner {
     public:
         Floorplanner() {}
     private:
-        Chip* _chip;
+        Chip*       _chip;
+        B_Tree*     _btree;
 };
 
 #endif

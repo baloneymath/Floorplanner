@@ -6,7 +6,7 @@
 #include <iostream>
 #include <cassert>
 #include "chip.h"
-#include "B-Tree.h"
+#include "B_Tree.h"
 #include "floorplanner.h"
 using namespace std;
 

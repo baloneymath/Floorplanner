@@ -13,7 +13,7 @@ all	: Floorplan.exe
 
 # optimized version
 Floorplan.exe 	: chip.o B_Tree.o floorplanner.o main.o
-				$(CC) $(OPTFLAGS) chip.o B-Tree.o floorplanner.o main.o -o Floorplan.exe
+				$(CC) $(OPTFLAGS) chip.o B_Tree.o floorplanner.o main.o -o Floorplan.exe
 main.o 		: src/main.cpp
 			$(CC) $(CFLAGS) $< -o $@
 chip.o		: src/chip.cpp src/chip.h

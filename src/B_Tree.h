@@ -13,10 +13,25 @@
 #include "chip.h"
 using namespace std;
 
+struct Node {
+    Node() {
+        me = parent = left = right = 0;
+    }
+    Node(Block* b, Block* p, Block* l, Block* r) {
+        me = b;
+        parent = p;
+        left = l;
+        right = r;
+    }
+
+    Block  *me, *parent, *left, *right;
+};
+
 class B_Tree {
     public:
         B_Tree() {}
     private:
+
 };
 
 
