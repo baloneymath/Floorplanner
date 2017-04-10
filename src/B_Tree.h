@@ -10,8 +10,10 @@
 #include <string>
 #include <vector>
 #include <list>
-#include "chip.h"
+#include "floorplanner.h"
 using namespace std;
+
+typedef pair<double, double>    Range;
 
 struct Node {
     Node() {
@@ -23,15 +25,25 @@ struct Node {
         left = l;
         right = r;
     }
-
+    int     id;
     Block  *me, *parent, *left, *right;
 };
 
-class B_Tree {
+class B_Tree : public Floorplanner {
     public:
-        B_Tree() {}
-    private:
+        B_Tree() {
+            _root = 0;
+        }
+        virtual ~B_Tree() {}
 
+        virtual void init();
+        virtual void pack();
+        virtual void perturb();
+
+    private:
+        Node*           _root;
+        vector<Node*>   _nodes;
+        vector<Range>   _yContour;
 };
 
 

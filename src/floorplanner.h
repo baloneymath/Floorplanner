@@ -6,17 +6,85 @@
 #ifndef _FLOORPLANNER_H
 #define _FLOORPLANNER_H
 
-#include "chip.h"
-#include "B_Tree.h"
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <unordered_map>
+#include <utility> // for pair
+#include <algorithm>
 using namespace std;
 
+typedef pair<double, double>        Location;
+typedef pair<Location, Location>    Rect;
+typedef unordered_map<string, int>  StringIntMap;
+
+struct Net {
+    Net() {}
+    Net(int i = 0, int d = 0, vector<string> p = vector<string>()):
+        id(i), degree(d), pins(p) {}
+    int     id;
+    int     degree;
+    vector<string> pins;
+};
+
+struct Terminal {
+    Terminal() {}
+    Terminal(string n = "", Location l = make_pair(0, 0),
+        vector<int> nt = vector<int>()):
+        name(n), loc(l), nets(nt) {}
+    string      name;
+    Location    loc;
+    vector<int> nets;
+};
+
+struct Block {
+    Block() {}
+    Block(string n = "", int w = 0, int h = 0, 
+        bool r = 0, Location loc = make_pair(0, 0)):
+        name(n), width(w), height(h), rotate(r), leftdown(loc) {}
+    
+    Location center() {
+        double x = leftdown.first + (rotate? width : height);
+        double y = leftdown.second + (rotate? height : width);
+        return make_pair(x, y);
+    }
+    
+    string      name;
+    double      width;
+    double      height;
+    bool        rotate;
+    Location    leftdown;
+    vector<int> nets;
+};
 
 class Floorplanner {
     public:
         Floorplanner() {}
-    private:
-        Chip*       _chip;
-        B_Tree*     _btree;
+        virtual ~Floorplanner() {}
+
+        void parse(double&, string&, string&);
+        void parseBlock(string&);
+        void parseNet(string&);
+        
+        virtual void init() = 0;
+        virtual void pack() = 0;
+        virtual void perturb() = 0;
+
+    protected:
+        // Outlines, basic
+        double  _alpha;
+        double  _width, _height;
+        int     _nNet, _nBlock, _nTerminal;
+
+        // name map
+        StringIntMap    _blocksMap;
+        StringIntMap    _terminalsMap;
+        
+        // main components
+        vector<Net*>        _nets;
+        vector<Block*>      _blocks;
+        vector<Terminal*>   _terminals;
 };
 
 #endif

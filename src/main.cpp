@@ -5,7 +5,6 @@
 *******************************************/
 #include <iostream>
 #include <cassert>
-#include "chip.h"
 #include "B_Tree.h"
 #include "floorplanner.h"
 using namespace std;
@@ -13,10 +12,10 @@ using namespace std;
 int main(int argc, char* argv[])
 {
     assert(argc >= 3);
-    int alpha = atoi(argv[1]);
+    double alpha = atoi(argv[1]);
     string bfile = argv[2];
     string nfile = argv[3];
-    Chip c;
-    c.parse(bfile, nfile) ;
+    B_Tree b;
+    b.parse(alpha, bfile, nfile);
     return 0;
 }
