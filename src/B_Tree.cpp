@@ -33,8 +33,8 @@ void B_Tree::pack()
 	_root->data->leftdown = make_pair(0, 0);
 	double rx = _root->data->rotate? _root->data->height : _root->data->width;
 	double ry = _root->data->rotate? _root->data->width : _root->data->height;
-	_yContour.push_back(Contour(make_pair(0, rx), ry));
-
+	_yContour.push_back(_root->data);
+	_contourMap[_root->id] = 0;
 }
 
 void B_Tree::perturb()
@@ -54,7 +54,7 @@ void B_Tree::recursivePack(Node* nn)
 	double y = nn->data->rotate? nn->data->width : p->data->height;
 	
 	nn->data->leftdown.first = p->data->leftdown.first + px;
-		
+
 	
 }
 

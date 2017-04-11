@@ -17,6 +17,7 @@ using namespace std;
 
 typedef pair<double, double>        Location;
 typedef pair<Location, Location>    Rect;
+typedef unordered_map<int, int>     IntIntMap;
 typedef unordered_map<string, int>  StringIntMap;
 
 struct Net {

@@ -14,7 +14,6 @@
 using namespace std;
 
 typedef pair<double, double>    Range;
-typedef pair<Range, double>     Contour;
 
 struct Node {
     Node() {
@@ -51,7 +50,9 @@ class B_Tree : public Floorplanner {
     private:
         Node*           _root;
         vector<Node*>   _nodes;
-        list<Contour>   _yContour;
+
+        IntIntMap       _contourMap;
+        list<Block*>    _yContour;
 };
 
 
