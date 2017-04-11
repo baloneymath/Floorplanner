@@ -53,6 +53,9 @@ struct Block {
     static bool smaller(Block* b1, Block* b2) {
         return b1->width * b1->height < b2->width * b2->height;
     }
+    static bool bigger(Block* b1, Block* b2) {
+        return b1->width * b1->height > b2->width * b2->height;
+    }
     static bool lesserX(Block* b1, Block* b2) {
         return b1->leftdown.first < b2->leftdown.first;
     }
@@ -76,10 +79,10 @@ class Floorplanner {
         void parse(double&, string&, string&);
         void parseBlock(string&);
         void parseNet(string&);
-        void unpack();
         
         virtual void init() = 0;
         virtual void pack() = 0;
+        virtual void unpack() = 0;
         virtual void perturb() = 0;
 
     protected:

@@ -86,10 +86,3 @@ void Floorplanner::parseNet(string& nfName)
     }
     cout << "Finish parse nets..." << endl;
 }
-
-void Floorplanner::unpack()
-{
-    for (auto& i : _blocks) {
-        i->leftdown = make_pair(-1, -1);
-    }
-}

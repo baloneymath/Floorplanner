@@ -14,14 +14,16 @@
 using namespace std;
 
 typedef pair<double, double>    Range;
+typedef pair<Range, double>     Contour;
 
 struct Node {
     Node() {
         data = 0;
         parent = left = right = 0;
     }
-    Node(Block* b, int p, int l, int r) {
+    Node(Block* b, int i, int p, int l, int r) {
         data = b;
+        id = i;
         parent = p;
         left = l;
         right = r;
@@ -40,12 +42,16 @@ class B_Tree : public Floorplanner {
 
         virtual void init();
         virtual void pack();
+        virtual void unpack();
         virtual void perturb();
+
+        void    recursivePack(Node*);
+        double  maxContour(Range&);
 
     private:
         Node*           _root;
         vector<Node*>   _nodes;
-        vector<Range>   _yContour;
+        list<Contour>   _yContour;
 };
 
 
