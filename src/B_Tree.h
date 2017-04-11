@@ -17,16 +17,18 @@ typedef pair<double, double>    Range;
 
 struct Node {
     Node() {
-        me = parent = left = right = 0;
+        data = 0;
+        parent = left = right = 0;
     }
-    Node(Block* b, Block* p, Block* l, Block* r) {
-        me = b;
+    Node(Block* b, int p, int l, int r) {
+        data = b;
         parent = p;
         left = l;
         right = r;
     }
     int     id;
-    Block  *me, *parent, *left, *right;
+    Block*  data;
+    int     parent, left, right;
 };
 
 class B_Tree : public Floorplanner {

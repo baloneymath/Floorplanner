@@ -41,13 +41,23 @@ struct Terminal {
 struct Block {
     Block() {}
     Block(string n = "", int w = 0, int h = 0, 
-        bool r = 0, Location loc = make_pair(0, 0)):
+        bool r = 0, Location loc = make_pair(-1, -1)):
         name(n), width(w), height(h), rotate(r), leftdown(loc) {}
     
     Location center() {
         double x = leftdown.first + (rotate? width : height);
         double y = leftdown.second + (rotate? height : width);
         return make_pair(x, y);
+    }
+    // compare functions
+    static bool smaller(Block* b1, Block* b2) {
+        return b1->width * b1->height < b2->width * b2->height;
+    }
+    static bool lesserX(Block* b1, Block* b2) {
+        return b1->leftdown.first < b2->leftdown.first;
+    }
+    static bool lesserY(Block* b1, Block* b2) {
+        return b1->leftdown.second < b2->leftdown.second;
     }
     
     string      name;
@@ -66,6 +76,7 @@ class Floorplanner {
         void parse(double&, string&, string&);
         void parseBlock(string&);
         void parseNet(string&);
+        void unpack();
         
         virtual void init() = 0;
         virtual void pack() = 0;
