@@ -32,10 +32,25 @@ struct Node {
     int     parent, left, right;
 };
 
+struct Contour {
+    Contour() {
+        data = 0;
+        prev = next = NIL;
+    }
+    Contour(Block* b, int p, int n) {
+        data = b;
+        prev = p;
+        next = n;
+    }
+    Block*  data;
+    int     prev, next;
+};
+
 class B_Tree : public Floorplanner {
     public:
         B_Tree() {
             _root = 0;
+            _conRoot = NIL;
         }
         virtual ~B_Tree() {}
 
@@ -45,14 +60,15 @@ class B_Tree : public Floorplanner {
         virtual void perturb();
 
         void    DFSPack(Node*);
-        void    placeBlock(Node*, list<Node*>::iterator);
-        double  updateContour(Node*, list<Node*>::iterator);
+        void    BFSPack(Node*);
+        void    placeBlock(Node*);
+        double  updateContour(Node*, int, bool);
     private:
         Node*           _root;
         vector<Node*>   _nodes;
-
-        list<Node*>::iterator   _current;
-        list<Node*>             _yContour;
+        queue<int> _bfsq;
+        int             _conRoot;
+        vector<Contour> _yContour;
 };
 
 

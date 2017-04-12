@@ -10,6 +10,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+#include <queue>
 #include <unordered_map>
 #include <utility> // for pair
 #include <algorithm>
