@@ -1,6 +1,7 @@
 # CC and CFLAGS are varilables
 CC = g++
-CFLAGS = -c -std=c++11
+CFLAGS = -c -std=c++11 
+BOOSTFLAGS = -lutil -lboost_iostreams -lboost_system -lboost_filesystem
 AR = ar
 ARFLAGS = rcv
 # -c option ask g++ to compile the source files, but do not link.
@@ -13,13 +14,13 @@ all	: Floorplan.exe
 
 # optimized version
 Floorplan.exe 	: B_Tree.o floorplanner.o main.o
-				$(CC) $(OPTFLAGS) B_Tree.o floorplanner.o main.o -o Floorplan.exe
+				$(CC) $(OPTFLAGS) B_Tree.o floorplanner.o main.o -o Floorplan.exe $(BOOSTFLAGS)
 main.o 		: src/main.cpp
-			$(CC) $(CFLAGS) $< -o $@
+			$(CC) $(CFLAGS) $< -o $@ $(BOOSTFLAGS)
 B_Tree.o	: src/B_Tree.cpp src/B_Tree.h
-			$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@
+			$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@ $(BOOSTFLAGS)
 floorplanner.o	: src/floorplanner.cpp src/floorplanner.h
-				$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@
+				$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@ $(BOOSTFLAGS)
 
 
 # clean all the .o and executable files

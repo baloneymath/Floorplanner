@@ -15,7 +15,9 @@ int main(int argc, char* argv[])
     double alpha = atoi(argv[1]);
     string bfile = argv[2];
     string nfile = argv[3];
-    B_Tree b;
-    b.parse(alpha, bfile, nfile);
+    B_Tree bt;
+    bt.parse(alpha, bfile, nfile);
+    bt.init();
+    bt.pack();
     return 0;
 }

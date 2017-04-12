@@ -86,3 +86,27 @@ void Floorplanner::parseNet(string& nfName)
     }
     cout << "Finish parse nets..." << endl;
 }
+
+void Floorplanner::gnuplot()
+{
+    Gnuplot gplt;
+    gplt << "set size ratio -1" << endl;
+    gplt << "set xrange " << 2 * _width << endl;
+    gplt << "set yrange " << 2 * _height << endl;
+    for (int i = 0; i < _nBlock; ++i) {
+        Block* b = _blocks[i];
+        gplt << "set object " << b->name << " rect from ";
+        gplt << b->leftdown.first << ",";
+        gplt << b->leftdown.second << " to ";
+        double w = b->width, h = b->height;
+        if (b->rotate) {
+            swap(w, h);
+        }
+        gplt << b->leftdown.first + w << ",";
+        gplt << b->leftdown.second + h << " fc rgb \"green\" " << endl;
+        gplt << "plot \'-\' w p ls 1" << endl;
+        gplt << "0 0" << endl;
+        gplt << "e" << endl;
+        gplt << "pause -1" << endl;
+    }
+}

@@ -15,6 +15,7 @@ using namespace std;
 
 typedef pair<double, double>    Range;
 
+
 struct Node {
     Node() {
         data = 0;
@@ -44,15 +45,15 @@ class B_Tree : public Floorplanner {
         virtual void unpack();
         virtual void perturb();
 
-        void    recursivePack(Node*);
-        double  maxContour(Range&);
-
+        void    DFSPack(Node*);
+        void    placeBlock(Node*, list<Node*>::iterator);
+        double  updateContour(Node*, list<Node*>::iterator);
     private:
         Node*           _root;
         vector<Node*>   _nodes;
 
-        IntIntMap       _contourMap;
-        list<Block*>    _yContour;
+        list<Node*>::iterator   _current;
+        list<Node*>             _yContour;
 };
 
 

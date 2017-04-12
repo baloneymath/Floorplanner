@@ -13,6 +13,7 @@
 #include <unordered_map>
 #include <utility> // for pair
 #include <algorithm>
+#include "../gnuplot-iostream/gnuplot-iostream.h"
 using namespace std;
 
 typedef pair<double, double>        Location;
@@ -80,6 +81,7 @@ class Floorplanner {
         void parse(double&, string&, string&);
         void parseBlock(string&);
         void parseNet(string&);
+        void gnuplot();
         
         virtual void init() = 0;
         virtual void pack() = 0;
