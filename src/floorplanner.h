@@ -13,7 +13,7 @@
 #include <unordered_map>
 #include <utility> // for pair
 #include <algorithm>
-#include "../gnuplot-iostream/gnuplot-iostream.h"
+#include "../lib/gnuplot-iostream.h"
 using namespace std;
 
 typedef pair<double, double>        Location;
@@ -47,8 +47,8 @@ struct Block {
         name(n), width(w), height(h), rotate(r), leftdown(loc) {}
     
     Location center() {
-        double x = leftdown.first + (rotate? width : height);
-        double y = leftdown.second + (rotate? height : width);
+        double x = leftdown.first + (rotate? height : width) / 2;
+        double y = leftdown.second + (rotate? width : height) / 2;
         return make_pair(x, y);
     }
     // compare functions

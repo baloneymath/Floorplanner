@@ -91,19 +91,25 @@ void Floorplanner::gnuplot()
 {
     Gnuplot gplt;
     gplt << "set size ratio -1" << endl;
-    gplt << "set xrange " << 2 * _width << endl;
-    gplt << "set yrange " << 2 * _height << endl;
+    double xr = 2 * _width, yr = 2 * _height;
+    gplt << "set xrange [" << 0 << ":" << xr << "]" << endl;
+    gplt << "set yrange [" << 0 << ":" << yr << "]" << endl;
+    gplt << "set object 1 rect from 0,0 to " << _width
+         << "," << _height << "fc rgb \"yellow\" " << endl;
     for (int i = 0; i < _nBlock; ++i) {
         Block* b = _blocks[i];
-        gplt << "set object " << b->name << " rect from ";
-        gplt << b->leftdown.first << ",";
-        gplt << b->leftdown.second << " to ";
+        if (b->leftdown == make_pair(-1., -1.)) continue;
         double w = b->width, h = b->height;
         if (b->rotate) {
             swap(w, h);
         }
-        gplt << b->leftdown.first + w << ",";
-        gplt << b->leftdown.second + h << " fc rgb \"green\" " << endl;
+        gplt << " set label \"" << b->name << "\" at "
+             << b->center().first << "," << b->center().second << endl;
+        gplt << " set object " << i + 2 << " rect from "
+             << b->leftdown.first << ","
+             << b->leftdown.second << " to "
+             << b->leftdown.first + w << ","
+             << b->leftdown.second + h << " fc rgb \"green\" " << endl;
         gplt << "plot \'-\' w p ls 1" << endl;
         gplt << "0 0" << endl;
         gplt << "e" << endl;

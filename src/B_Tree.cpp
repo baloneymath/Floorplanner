@@ -4,13 +4,12 @@
 * CXXFLAGS: c++11                          *
 *******************************************/
 #include "B_Tree.h"
-const int NIL = -1;
 
 void B_Tree::init()
 {
 	_nodes.resize(_nBlock);
 	vector<Block*> cpBlocks = _blocks;
-	sort(cpBlocks.begin(), cpBlocks.end(), Block::bigger);
+	//sort(cpBlocks.begin(), cpBlocks.end(), Block::bigger);
 	// init by complete binary tree
 	for (int i = 0; i < _nBlock; ++i) {
 		int p = (i + 1) / 2 - 1;
@@ -34,7 +33,6 @@ void B_Tree::pack()
 {
 	_current = _yContour.begin();
 	DFSPack(_root);
-	gnuplot();
 }
 
 void B_Tree::perturb()
@@ -43,16 +41,17 @@ void B_Tree::perturb()
 }
 
 void B_Tree::DFSPack(Node* nn)
-{	
+{
+	gnuplot();
 	placeBlock(nn, _current);
 	if (nn->left != NIL) {
 		++_current;
 		DFSPack(_nodes[nn->left]);
 	}
 	if (nn->right != NIL) {
-		--_current;
 		DFSPack(_nodes[nn->right]);
 	}
+	else --_current;
 }
 
 void B_Tree::placeBlock(Node* nn, list<Node*>::iterator cur)
@@ -74,33 +73,36 @@ void B_Tree::placeBlock(Node* nn, list<Node*>::iterator cur)
 	else if (p != 0 && p->left == nn->id) { // nn is left
 		Block* pb = p->data;
 		double px = pb->rotate? pb->height : pb->width;
-		b->leftdown.first = px + pb->leftdown.first;
-		b->leftdown.second = updateContour(nn, next(cur, 1));
-		_yContour.insert(next(cur, 1), nn);
-		
+		b->leftdown.first = pb->leftdown.first + px;
+		b->leftdown.second = updateContour(nn, ++cur);
 	}
-	else { // nn is right (upper block)
+	else if (p != 0 && p->right == nn->id) { // nn is right (upper block)
 		Block* pb = p->data;
-		double px = pb->rotate? pb->height : pb->width;
-		b->leftdown.first = px;
+		b->leftdown.first = pb->leftdown.first;
 		b->leftdown.second = updateContour(nn, cur);
-		_yContour.insert(cur, nn);
 	}
 }
 
 double B_Tree::updateContour(Node* n, list<Node*>::iterator cur) {
 	double maxh = 0, nowx = 0;
 	for (auto it = cur; it != _yContour.end(); ++it) {
-		Block* tb = (*it)->data;
-		double tw = tb->width, th = tb->height;
-		if (tb->rotate) {
-			swap(tw, th);
+		Block* b = (*it)->data;
+		double w = b->width, h = b->height;
+		if (b->rotate) {
+			swap(w, h);
 		}
-		maxh = max(maxh, tb->leftdown.second + th);
-		if (nowx + tw <= n->data->width) {
+		maxh = max(maxh, b->leftdown.second + h);
+		double nx = n->data->rotate? n->data->height : n->data->width;
+		if (nowx + w < nx) {
+			nowx += w;
 			it = _yContour.erase(it);
+		}
+		else if (nowx + w == nx) {
+			it = _yContour.erase(it);
+			break;
 		}
 		else break;
 	}
+	_yContour.insert(cur, n);
 	return maxh;
 }

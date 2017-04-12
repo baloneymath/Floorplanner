@@ -13,13 +13,12 @@
 #include "floorplanner.h"
 using namespace std;
 
-typedef pair<double, double>    Range;
-
+const int NIL = -1;
 
 struct Node {
     Node() {
         data = 0;
-        parent = left = right = 0;
+        parent = left = right = NIL;
     }
     Node(Block* b, int i, int p, int l, int r) {
         data = b;
@@ -28,8 +27,8 @@ struct Node {
         left = l;
         right = r;
     }
-    int     id;
     Block*  data;
+    int     id;
     int     parent, left, right;
 };
 
