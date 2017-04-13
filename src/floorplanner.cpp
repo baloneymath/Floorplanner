@@ -5,9 +5,13 @@
 *******************************************/
 #include "floorplanner.h"
 
-void Floorplanner::parse(double& a, string& bfName, string& nfName)
+const double DBL_MAX = numeric_limits<double>::max();
+const double DBL_MIN = numeric_limits<double>::min();
+
+void Floorplanner::parse(double& a, double& b, string& bfName, string& nfName)
 {
     _alpha = a;
+    _beta = b;
     parseBlock(bfName);
     parseNet(nfName);
 }
@@ -87,15 +91,46 @@ void Floorplanner::parseNet(string& nfName)
     cout << "Finish parse nets..." << endl;
 }
 
+double Floorplanner::HPWL()
+{
+    double val = 0;
+    for (int i = 0; i < _nNet; ++i) {
+        double left = DBL_MAX;
+        double right = DBL_MIN;
+        double down = DBL_MAX;
+        double top = 0.;
+        for (auto& str : _nets[i]->pins) {
+            int pos = 0;
+            double x = 0, y = 0;
+            if (_blocksMap[str]) {
+                pos = _blocksMap[str];
+                x = _blocks[pos]->center().first;
+                y = _blocks[pos]->center().second;
+            }
+            else if (_terminalsMap[str]) {
+                pos = _terminalsMap[str];
+                x = _terminals[pos]->loc.first;
+                x = _terminals[pos]->loc.second;
+            }
+            left = min(left, x);
+            right = max(right, x);
+            down = min(down, y);
+            top = min(top, y);
+        }
+        val += (right - left) + (top - down);
+    }
+    return val;
+}
+
 void Floorplanner::gnuplot()
 {
     Gnuplot gplt;
-    gplt << " set size ratio -1" << endl;
+    gplt << "set size 1,1" << endl;
     double xr = 2 * _width, yr = 2 * _height;
-    gplt << " set xrange [" << 0 << ":" << xr << "]" << endl;
-    gplt << " set yrange [" << 0 << ":" << yr << "]" << endl;
-    gplt << " set object 1 rect from 0,0 to " << _width
-         << "," << _height << "fc rgb \"yellow\" " << endl;
+    gplt << "set xrange [" << 0 << ":" << xr << "]" << endl;
+    gplt << "set yrange [" << 0 << ":" << yr << "]" << endl;
+    gplt << "set object 1 rect from 0,0 to " << _width
+         << "," << _height << "fc rgb \"yellow\" back" << endl;
     for (int i = 0; i < _nBlock; ++i) {
         Block* b = _blocks[i];
         if (b->leftdown == make_pair(-1., -1.)) continue;

@@ -10,6 +10,7 @@
 #include <string>
 #include <vector>
 #include <list>
+#include <random>
 #include "floorplanner.h"
 using namespace std;
 
@@ -52,21 +53,31 @@ class B_Tree : public Floorplanner {
             _root = 0;
             _conRoot = NIL;
         }
-        virtual ~B_Tree() {}
+        virtual ~B_Tree();
 
         virtual void init();
         virtual void pack();
         virtual void unpack();
         virtual void perturb();
 
+        virtual double Area();
+
+        vector<Contour> yContour() {return _yContour;}
+    
+    protected:
+        // packing
         void    DFSPack(Node*);
-        void    BFSPack(Node*);
         void    placeBlock(Node*);
         double  updateContour(Node*, int, bool);
+
+        // perturb
+        void    rotateBlock(Node*);
+        void    insertNode(Node*, Node*, bool);
+        void    deleteNode(Node*);
+        void    swapNode(Node*, Node*);
     private:
         Node*           _root;
         vector<Node*>   _nodes;
-        queue<int> _bfsq;
         int             _conRoot;
         vector<Contour> _yContour;
 };

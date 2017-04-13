@@ -5,19 +5,32 @@
 *******************************************/
 #include <iostream>
 #include <cassert>
+#include <ctime>
 #include "B_Tree.h"
 #include "floorplanner.h"
+#include "fastSA.h"
 using namespace std;
 
 int main(int argc, char* argv[])
 {
     assert(argc >= 3);
+    
+    clock_t start, stop;
+    assert((start = clock()) != -1);
+
     double alpha = atoi(argv[1]);
+    double beta = 0.5;
     string bfile = argv[2];
     string nfile = argv[3];
     B_Tree bt;
-    bt.parse(alpha, bfile, nfile);
+    bt.parse(alpha, beta, bfile, nfile);
     bt.init();
     bt.pack();
+    stop = clock();
+    cout << bt.HPWL() << endl;
+    cout << bt.Area() << endl;
+    cout << "\nRuntime: " 
+         << (double)(stop - start) / CLOCKS_PER_SEC 
+         << "s" << endl;
     return 0;
 }

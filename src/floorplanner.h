@@ -79,7 +79,7 @@ class Floorplanner {
         Floorplanner() {}
         virtual ~Floorplanner() {}
 
-        void parse(double&, string&, string&);
+        void parse(double&, double&, string&, string&);
         void parseBlock(string&);
         void parseNet(string&);
         void gnuplot();
@@ -89,9 +89,25 @@ class Floorplanner {
         virtual void unpack() = 0;
         virtual void perturb() = 0;
 
+        double HPWL();
+        virtual double Area() = 0;
+
+        int nNet() {return _nNet;}
+        int nBlock() {return _nBlock;}
+        int nTerminal() {return _nTerminal;}
+        double alpha() {return _alpha;}
+        double beta() {return _beta;}
+        double width() {return _width;}
+        double height() {return _height;}
+        
+        vector<Net*>        nets() {return _nets;}
+        vector<Block*>      blocks() {return _blocks;}
+        vector<Terminal*>   terminals() {return _terminals;}  
+        StringIntMap        blocksMap() {return _blocksMap;}
+        StringIntMap        terminalsMap() {return _terminalsMap;}
     protected:
         // Outlines, basic
-        double  _alpha;
+        double  _alpha, _beta;
         double  _width, _height;
         int     _nNet, _nBlock, _nTerminal;
 

@@ -4,12 +4,20 @@
 * CXXFLAGS: c++11                          *
 *******************************************/
 #include "B_Tree.h"
+B_Tree::~B_Tree()
+{
+	for (auto& i : _nodes) {
+		delete i;
+	}
+}
 
 void B_Tree::init()
 {
 	_nodes.resize(_nBlock);
 	_yContour.resize(_nBlock, Contour());
 	vector<Block*> cpBlocks = _blocks;
+
+	//random_shuffle(cpBlocks.begin(), cpBlocks.end());
 	//sort(cpBlocks.begin(), cpBlocks.end(), Block::bigger);
 	// init by complete binary tree
 	for (int i = 0; i < _nBlock; ++i) {
@@ -32,17 +40,16 @@ void B_Tree::unpack()
 
 void B_Tree::pack()
 {
-	BFSPack(_root);
-}
-
-void B_Tree::perturb()
-{
-
+	DFSPack(_root);
+	gnuplot();
 }
 
 void B_Tree::DFSPack(Node* nn)
 {
 	placeBlock(nn);
+	for (int c = _conRoot; c != NIL; c = _yContour[c].next) {
+		cerr << _yContour[c].data->name << ' ';
+	} cerr << endl;
 	if (nn->left != NIL) {
 		DFSPack(_nodes[nn->left]);
 	}
@@ -51,27 +58,6 @@ void B_Tree::DFSPack(Node* nn)
 	}
 }
 
-void B_Tree::BFSPack(Node* nn)
-{
-	_bfsq.push(nn->id);
-	while (!_bfsq.empty()) {
-		int ne = _bfsq.front();
-		_bfsq.pop();
-		placeBlock(_nodes[ne]);
-		//if (_nodes[ne]->data->name == "bk1") {
-	for (int c = _conRoot; c != NIL; c = _yContour[c].next) {
-		cerr << _yContour[c].data->name << ' ';
-	} cerr << endl;
-	gnuplot();
-		//}
-		if (_nodes[ne]->left != NIL) {
-			_bfsq.push(_nodes[ne]->left);
-		}
-		if (_nodes[ne]->right != NIL) {
-			_bfsq.push(_nodes[ne]->right);
-		}
-	}
-}
 
 void B_Tree::placeBlock(Node* nn)
 {
@@ -103,7 +89,8 @@ void B_Tree::placeBlock(Node* nn)
 	}
 }
 
-double B_Tree::updateContour(Node* n, int parent, bool isleft) {
+double B_Tree::updateContour(Node* n, int parent, bool isleft)
+{
 	double maxh = 0, lpos = 0, rpos = 0;
 	double lx = n->data->leftdown.first;
 	double nx = n->data->rotate? n->data->height : n->data->width;
@@ -149,4 +136,104 @@ double B_Tree::updateContour(Node* n, int parent, bool isleft) {
 		_yContour[n->id].data = n->data;
 	}
 	return maxh;
+}
+
+void B_Tree::perturb()
+{
+
+}
+
+void B_Tree::rotateBlock(Node* n)
+{
+	n->data->rotate = true;
+}
+
+void B_Tree::insertNode(Node* parent, Node* n, bool isleft)
+{
+	if (isleft && parent->left == NIL) {
+		parent->left = n->id;
+		n->parent = parent->id;
+	}
+	else if (isleft && parent->left != NIL) {
+		Node* ori = _nodes[parent->left];
+		ori->parent = n->id;
+		random_device rd;
+  		mt19937 gen(rd());
+		uniform_int_distribution<> dis(1, 100);
+		if (dis(gen) % 2 == 0) n->left = ori->id;
+		else n->right = ori->id;
+		n->parent = parent->id;
+	}
+	else if (!isleft && parent->right == NIL) {
+		parent->right = n->id;
+		n->parent = parent->id;
+	}
+	else if (!isleft && parent->right != NIL) {
+		Node* ori = _nodes[parent->right];
+		ori->parent = n->id;
+		random_device rd;
+  		mt19937 gen(rd());
+		uniform_int_distribution<> dis(1, 100);
+		if (dis(gen) % 2 == 0) n->left = ori->id;
+		else n->right = ori->id;
+		n->parent = parent->id;
+	}
+}
+
+void B_Tree::deleteNode(Node* n)
+{
+	Node* p = _nodes[n->parent];
+	if (n->left == NIL && n->right == NIL) { // leaf node
+		n->parent = NIL;
+		if (n->id == p->left) p->left = NIL;
+		else p->right = NIL;
+	}
+	else if (n->left != NIL && n->right == NIL) {
+		Node* child = _nodes[n->left];
+		child->parent = n->parent;
+		if (n->id == p->left) p->left = child->id;
+		else p->right = child->id;
+	}
+	else if (n->left == NIL && n->right != NIL) {
+		Node* child = _nodes[n->right];
+		child->parent = n->parent;
+		if (n->id == p->left) p->left = child->id;
+		else p->right = child->id;
+	}
+	else if (n->left != NIL && n->right != NIL) {
+		random_device rd;
+  		mt19937 gen(rd());
+		uniform_int_distribution<> dis(1, 100);
+		Node* child = 0;
+		if (dis(gen) % 2 == 0) {
+			child = _nodes[n->left];
+			child->parent = n->parent;
+			child->right = n->right;
+		}
+		else {
+			child = _nodes[n->right];
+			child->parent = n->parent;
+			child->left = n->left;
+		}
+	}
+}
+
+void B_Tree::swapNode(Node* n1, Node* n2) 
+{
+	swap(n1->parent, n2->parent);
+	swap(n1->left, n2->left);
+	swap(n1->right, n2->right);
+}
+
+double B_Tree::Area()
+{
+    double val = 0;
+    double width = 0, height = 0;
+    for (auto i : _yContour) {
+        double x = i.data->width, y = i.data->height;
+        if (i.data->rotate) swap(x, y);
+        width = max(width, i.data->leftdown.first + x);
+        height = max(height, i.data->leftdown.second + y);
+    }
+    return width * height;
 }
