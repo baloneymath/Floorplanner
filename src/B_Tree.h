@@ -21,6 +21,13 @@ struct Node {
         data = 0;
         parent = left = right = NIL;
     }
+    Node(const Node& n) {
+        data = n.data;
+        id = n.id;
+        parent = n.parent;
+        left = n.left;
+        right = n.right;
+    }
     Node(Block* b, int i, int p, int l, int r) {
         data = b;
         id = i;
@@ -47,6 +54,16 @@ struct Contour {
     int     prev, next;
 };
 
+struct Result {
+    Result() {
+        root = 0;
+        cost = DBL_MAX;
+    }
+    Node* root;
+    vector<Node> nodes;
+    double cost;
+};
+
 class B_Tree : public Floorplanner {
     public:
         B_Tree() {
@@ -62,7 +79,11 @@ class B_Tree : public Floorplanner {
 
         virtual double Area();
 
-        vector<Contour> yContour() {return _yContour;}
+        // for SA
+        virtual void    initResult();
+        virtual Result  storeResult();
+        virtual void    restoreResult(Result&);
+        virtual void    keepBestResult(Result&);
     
     protected:
         // packing
@@ -75,11 +96,16 @@ class B_Tree : public Floorplanner {
         void    insertNode(Node*, Node*, bool);
         void    deleteNode(Node*);
         void    swapNode(Node*, Node*);
+        void    transplant(Node*, Node*);
+    
     private:
         Node*           _root;
         vector<Node*>   _nodes;
         int             _conRoot;
         vector<Contour> _yContour;
+        
+        // for SA
+        Result      _best, _cur;
 };
 
 

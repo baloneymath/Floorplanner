@@ -5,8 +5,6 @@
 *******************************************/
 #include "floorplanner.h"
 
-const double DBL_MAX = numeric_limits<double>::max();
-const double DBL_MIN = numeric_limits<double>::min();
 
 void Floorplanner::parse(double& a, double& b, string& bfName, string& nfName)
 {

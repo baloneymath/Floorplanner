@@ -14,7 +14,7 @@ using namespace std;
 int main(int argc, char* argv[])
 {
     assert(argc >= 3);
-    
+    srand(time(0));    
     clock_t start, stop;
     assert((start = clock()) != -1);
 
@@ -26,9 +26,11 @@ int main(int argc, char* argv[])
     bt.parse(alpha, beta, bfile, nfile);
     bt.init();
     bt.pack();
+    bt.gnuplot();
+    //cout << bt.HPWL() << endl;
+    //cout << bt.Area() << endl;
+    //fastSA::fastSA(bt);
     stop = clock();
-    cout << bt.HPWL() << endl;
-    cout << bt.Area() << endl;
     cout << "\nRuntime: " 
          << (double)(stop - start) / CLOCKS_PER_SEC 
          << "s" << endl;

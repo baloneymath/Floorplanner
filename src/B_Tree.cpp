@@ -17,7 +17,8 @@ void B_Tree::init()
 	_yContour.resize(_nBlock, Contour());
 	vector<Block*> cpBlocks = _blocks;
 
-	//random_shuffle(cpBlocks.begin(), cpBlocks.end());
+	auto ran = [] (int i) -> int { return rand() % i; };
+	//random_shuffle(cpBlocks.begin(), cpBlocks.end(), ran);
 	//sort(cpBlocks.begin(), cpBlocks.end(), Block::bigger);
 	// init by complete binary tree
 	for (int i = 0; i < _nBlock; ++i) {
@@ -36,20 +37,20 @@ void B_Tree::unpack()
         i->leftdown = make_pair(-1, -1);
     }
 	_yContour.clear();
+	_yContour.resize(_nBlock, Contour());
 }
 
 void B_Tree::pack()
 {
 	DFSPack(_root);
-	gnuplot();
 }
 
 void B_Tree::DFSPack(Node* nn)
 {
 	placeBlock(nn);
-	for (int c = _conRoot; c != NIL; c = _yContour[c].next) {
-		cerr << _yContour[c].data->name << ' ';
-	} cerr << endl;
+//	for (int c = _conRoot; c != NIL; c = _yContour[c].next) {
+//		cerr << _yContour[c].data->name << ' ';
+//	} cerr << endl;
 	if (nn->left != NIL) {
 		DFSPack(_nodes[nn->left]);
 	}
@@ -57,7 +58,6 @@ void B_Tree::DFSPack(Node* nn)
 		DFSPack(_nodes[nn->right]);
 	}
 }
-
 
 void B_Tree::placeBlock(Node* nn)
 {
@@ -140,7 +140,15 @@ double B_Tree::updateContour(Node* n, int parent, bool isleft)
 
 void B_Tree::perturb()
 {
-
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_int_distribution<> dis(0, _nBlock - 1);
+	int n1 = dis(gen), n2 = dis(gen);
+	swapNode(_nodes[n1], _nodes[n2]);
+	for (int i = 0; i < 3; ++i) {
+		rotateBlock(_nodes[dis(gen)]);
+	}
+	//deleteNode(_nodes[1]);
 }
 
 void B_Tree::rotateBlock(Node* n)
@@ -150,84 +158,78 @@ void B_Tree::rotateBlock(Node* n)
 
 void B_Tree::insertNode(Node* parent, Node* n, bool isleft)
 {
-	if (isleft && parent->left == NIL) {
-		parent->left = n->id;
-		n->parent = parent->id;
-	}
-	else if (isleft && parent->left != NIL) {
-		Node* ori = _nodes[parent->left];
-		ori->parent = n->id;
-		random_device rd;
-  		mt19937 gen(rd());
-		uniform_int_distribution<> dis(1, 100);
-		if (dis(gen) % 2 == 0) n->left = ori->id;
-		else n->right = ori->id;
-		n->parent = parent->id;
-	}
-	else if (!isleft && parent->right == NIL) {
-		parent->right = n->id;
-		n->parent = parent->id;
-	}
-	else if (!isleft && parent->right != NIL) {
-		Node* ori = _nodes[parent->right];
-		ori->parent = n->id;
-		random_device rd;
-  		mt19937 gen(rd());
-		uniform_int_distribution<> dis(1, 100);
-		if (dis(gen) % 2 == 0) n->left = ori->id;
-		else n->right = ori->id;
-		n->parent = parent->id;
-	}
 }
 
 void B_Tree::deleteNode(Node* n)
 {
-	Node* p = _nodes[n->parent];
-	if (n->left == NIL && n->right == NIL) { // leaf node
-		n->parent = NIL;
-		if (n->id == p->left) p->left = NIL;
-		else p->right = NIL;
-	}
-	else if (n->left != NIL && n->right == NIL) {
-		Node* child = _nodes[n->left];
-		child->parent = n->parent;
-		if (n->id == p->left) p->left = child->id;
-		else p->right = child->id;
-	}
-	else if (n->left == NIL && n->right != NIL) {
-		Node* child = _nodes[n->right];
-		child->parent = n->parent;
-		if (n->id == p->left) p->left = child->id;
-		else p->right = child->id;
-	}
-	else if (n->left != NIL && n->right != NIL) {
-		random_device rd;
-  		mt19937 gen(rd());
-		uniform_int_distribution<> dis(1, 100);
-		Node* child = 0;
-		if (dis(gen) % 2 == 0) {
-			child = _nodes[n->left];
-			child->parent = n->parent;
-			child->right = n->right;
-		}
-		else {
-			child = _nodes[n->right];
-			child->parent = n->parent;
-			child->left = n->left;
-		}
-	}
 }
 
 void B_Tree::swapNode(Node* n1, Node* n2) 
 {
-	swap(n1->parent, n2->parent);
-	swap(n1->left, n2->left);
-	swap(n1->right, n2->right);
+	if (n1 == n2) return;
+	if (_root == n1) _root = n2;
+	else if (_root == n2) _root = n1;
+	auto __swapNode  = [] (Node* n1, Node* n2, vector<Node*> _nodes) {
+		if (n1->left != NIL) _nodes[n1->left]->parent = n2->id;
+		if (n1->right != NIL) _nodes[n1->right]->parent = n2->id;
+		if (n1->parent != NIL) {
+			Node* p = _nodes[n1->parent];
+			if (p->left == n1->id) p->left = n2->id;
+			else p->right = n2->id;
+		}
+		if (n2->left != NIL) _nodes[n2->left]->parent = n1->id;
+		if (n2->right != NIL) _nodes[n2->right]->parent = n1->id;
+		if (n2->parent != NIL) {
+			Node* p = _nodes[n2->parent];
+			if (p->left == n2->id) p->left = n1->id;
+			else p->right = n1->id;
+		}
+		swap(n1->parent, n2->parent);
+		swap(n1->left, n2->left);
+		swap(n1->right, n2->right);
+	};
+	if (n1->parent != n2->id && n2->parent != n1->id) { // not connected
+		__swapNode(n1, n2, _nodes);
+	}
+	else { // connected node
+		if (n2->parent != n1->id) swap(n1, n2);
+		bool isleft = n1->left == n2->id? true : false;
+		if (n1->left == n2->id) n1->left = NIL;
+		else n1->right = NIL;
+		__swapNode(n1, n2, _nodes);
+		n1->parent = n2->id;
+		if (isleft) n2->left = n1->id;
+		else n2->right = n1->id;
+	}
+}
+void B_Tree::transplant(Node* u, Node* v)
+{
+	Node* pu = u->parent == NIL? 0 : _nodes[u->parent];
+	Node* lu = u->left == NIL? 0 : _nodes[u->left];
+	Node* ru = u->right == NIL? 0 : _nodes[u->right];
+	
+	u->parent = u->left = u->right = NIL;
+	bool isleft = u->id == pu->left? true : false;
+	if (pu != 0) {
+		if (isleft) pu->left = v->id;
+		else pu->right = v->id;
+		v->parent = pu->id;	
+	}
+	else v->parent = NIL;
+	if (lu != 0) {
+		lu->parent = v->id;
+		v->left = lu->id;
+	}
+	else v->left = NIL;
+	if (ru != 0) {
+		ru->parent = v->id;
+		v->right = ru->id;
+	}
+	else v->right = NIL;
 }
 
 double B_Tree::Area()
 {
-    double val = 0;
     double width = 0, height = 0;
     for (auto i : _yContour) {
         double x = i.data->width, y = i.data->height;
@@ -236,4 +238,40 @@ double B_Tree::Area()
         height = max(height, i.data->leftdown.second + y);
     }
     return width * height;
+}
+
+
+void B_Tree::initResult()
+{
+	_cur.root = _root;
+	_cur.nodes.resize(_nBlock);
+	for (int i = 0; i < _nBlock; ++i) {
+		_cur.nodes[i] = *_nodes[i];
+	}
+	// init cost => norm = 1
+	_cur.cost = _alpha * Area() + (1 - _alpha) * HPWL();
+	_best = _cur;
+}
+
+Result B_Tree::storeResult()
+{
+	Result r;
+	r.root = _cur.root;
+	r.nodes = _cur.nodes;
+	r.cost = _cur.cost;
+	return r;
+}
+
+void B_Tree::restoreResult(Result& re)
+{
+	_cur.root = re.root;
+	_cur.nodes = re.nodes;
+	_cur.cost = re.cost;
+}
+
+void B_Tree::keepBestResult(Result& re)
+{
+	if (_best.cost > re.cost) {
+		_best = re;
+	}
 }

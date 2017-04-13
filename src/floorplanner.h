@@ -6,6 +6,7 @@
 #ifndef _FLOORPLANNER_H
 #define _FLOORPLANNER_H
 
+#include <cstdlib>
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -21,6 +22,9 @@ typedef pair<double, double>        Location;
 typedef pair<Location, Location>    Rect;
 typedef unordered_map<int, int>     IntIntMap;
 typedef unordered_map<string, int>  StringIntMap;
+
+const double DBL_MAX = numeric_limits<double>::max();
+const double DBL_MIN = numeric_limits<double>::min();
 
 struct Net {
     Net() {}
@@ -74,6 +78,9 @@ struct Block {
     vector<int> nets;
 };
 
+
+extern struct Result _best;
+extern struct Result _cur;
 class Floorplanner {
     public:
         Floorplanner() {}
@@ -91,15 +98,21 @@ class Floorplanner {
 
         double HPWL();
         virtual double Area() = 0;
+        
+        // for SA
+        virtual void    initResult() = 0;
+        virtual Result  storeResult() = 0;
+        virtual void    restoreResult(Result&) = 0;
+        virtual void    keepBestResult(Result&) = 0;
 
+        // get
         int nNet() {return _nNet;}
         int nBlock() {return _nBlock;}
         int nTerminal() {return _nTerminal;}
         double alpha() {return _alpha;}
         double beta() {return _beta;}
         double width() {return _width;}
-        double height() {return _height;}
-        
+        double height() {return _height;}        
         vector<Net*>        nets() {return _nets;}
         vector<Block*>      blocks() {return _blocks;}
         vector<Terminal*>   terminals() {return _terminals;}  
@@ -119,6 +132,8 @@ class Floorplanner {
         vector<Net*>        _nets;
         vector<Block*>      _blocks;
         vector<Terminal*>   _terminals;
+        
 };
+
 
 #endif
