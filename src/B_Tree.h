@@ -56,10 +56,10 @@ struct Contour {
 
 struct Result {
     Result() {
-        root = 0;
+        root;
         cost = DBL_MAX;
     }
-    Node* root;
+    Node root;
     vector<Node> nodes;
     double cost;
 };
@@ -84,20 +84,21 @@ class B_Tree : public Floorplanner {
         virtual Result  storeResult();
         virtual void    restoreResult(Result&);
         virtual void    keepBestResult(Result&);
-    
+
     protected:
         // packing
         void    DFSPack(Node*);
         void    placeBlock(Node*);
         double  updateContour(Node*, int, bool);
+        void    updateCurrent();
 
         // perturb
         void    rotateBlock(Node*);
         void    insertNode(Node*, Node*, bool);
         void    deleteNode(Node*);
         void    swapNode(Node*, Node*);
-        void    transplant(Node*, Node*);
-    
+        
+        int     getRand();
     private:
         Node*           _root;
         vector<Node*>   _nodes;

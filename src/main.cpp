@@ -26,13 +26,17 @@ int main(int argc, char* argv[])
     bt.parse(alpha, beta, bfile, nfile);
     bt.init();
     bt.pack();
-    bt.gnuplot();
-    bt.perturb();
-    bt.unpack();
-    bt.pack();
-    bt.gnuplot();
-    //cout << bt.HPWL() << endl;
-    //cout << bt.Area() << endl;
+    cout << "Area: " << bt.Area() << " HPWL:" << bt.HPWL() << endl;
+    //bt.gnuplot();
+    for (int i = 0; i < 5; ++i) {
+        bt.perturb(); cerr << "perturb ";
+        bt.pack(); cerr << "pack" << endl;
+    cout << "Area: " << bt.Area() << " HPWL:" << bt.HPWL() << endl << endl;
+        //bt.gnuplot();
+    }
+    //bt.perturb();
+    //bt.pack();
+    //bt.gnuplot();
     //fastSA::fastSA(bt);
     stop = clock();
     cout << "\nRuntime: " 

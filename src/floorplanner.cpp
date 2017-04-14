@@ -113,7 +113,7 @@ double Floorplanner::HPWL()
             left = min(left, x);
             right = max(right, x);
             down = min(down, y);
-            top = min(top, y);
+            top = max(top, y);
         }
         val += (right - left) + (top - down);
     }
@@ -123,10 +123,10 @@ double Floorplanner::HPWL()
 void Floorplanner::gnuplot()
 {
     Gnuplot gplt;
-    gplt << "set size 1,1" << endl;
     double xr = 2 * _width, yr = 2 * _height;
     gplt << "set xrange [" << 0 << ":" << xr << "]" << endl;
     gplt << "set yrange [" << 0 << ":" << yr << "]" << endl;
+    gplt << "set size ratio -1" << endl;
     gplt << "set object 1 rect from 0,0 to " << _width
          << "," << _height << "fc rgb \"yellow\" back" << endl;
     for (int i = 0; i < _nBlock; ++i) {

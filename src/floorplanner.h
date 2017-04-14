@@ -24,7 +24,7 @@ typedef unordered_map<int, int>     IntIntMap;
 typedef unordered_map<string, int>  StringIntMap;
 
 const double DBL_MAX = numeric_limits<double>::max();
-const double DBL_MIN = numeric_limits<double>::min();
+const double DBL_MIN = numeric_limits<double>::lowest();
 
 struct Net {
     Net() {}
@@ -112,7 +112,9 @@ class Floorplanner {
         double alpha() {return _alpha;}
         double beta() {return _beta;}
         double width() {return _width;}
-        double height() {return _height;}        
+        double height() {return _height;}
+        double curW() {return _curW;}      
+        double curH() {return _curH;}      
         vector<Net*>        nets() {return _nets;}
         vector<Block*>      blocks() {return _blocks;}
         vector<Terminal*>   terminals() {return _terminals;}  
@@ -122,6 +124,7 @@ class Floorplanner {
         // Outlines, basic
         double  _alpha, _beta;
         double  _width, _height;
+        double  _curW, _curH;
         int     _nNet, _nBlock, _nTerminal;
 
         // name map

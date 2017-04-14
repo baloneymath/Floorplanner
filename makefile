@@ -13,14 +13,16 @@ all	: Floorplan.exe
 	@echo -n ""
 
 # optimized version
-Floorplan.exe 	: B_Tree.o floorplanner.o main.o
-				$(CC) $(OPTFLAGS) B_Tree.o floorplanner.o main.o -o Floorplan.exe $(BOOSTFLAGS)
+Floorplan.exe 	: B_Tree.o floorplanner.o fastSA.o main.o
+				$(CC) $(OPTFLAGS) B_Tree.o floorplanner.o fastSA.o main.o -o Floorplan.exe $(BOOSTFLAGS)
 main.o 		: src/main.cpp
 			$(CC) $(CFLAGS) $< -o $@ $(BOOSTFLAGS)
 B_Tree.o	: src/B_Tree.cpp src/B_Tree.h
 			$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@ $(BOOSTFLAGS)
 floorplanner.o	: src/floorplanner.cpp src/floorplanner.h
 				$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@ $(BOOSTFLAGS)
+fastSA.o	: src/fastSA.cpp src/fastSA.h
+			$(CC) $(CFLAGS) $(OPTFLAGS) $< -o $@ $(BOOSTFLAGS)
 
 
 # clean all the .o and executable files
