@@ -7,34 +7,67 @@
 
 namespace fastSA {
 
-double  T = DBL_MAX, ORI_T = DBL_MAX;
+double  T = 10, ORI_T = 0;
 double  P = 0.99; // initial acceptance rate
 const int K = 7;
-const int N = 5; // how many tries per iteration
-const double C = 100.;
-const double T_LOWER_BOUND = 0.01;
+const int initN = 10; // inital perturbs
+const int N = 10; // how many tries per iteration
+const double C = 150.;
+const double T_LOWER_BOUND = 0.0001;
+const double C_LOWER_BOUND = 0.0001;
 double alpha = 0;
 double alpha_base = 0;
+double beta = 0.4;
 double fplans = 0;
 double f_fplans = 0;
 
-void fastSA(Floorplanner& fp)
+void FastSA(Floorplanner& fp)
 {
-    alpha_base = fp.alpha();
-    double alpha = alpha_base;
-    double avgA = 0, avgW = 0, avgUphill = 0, avgCost = 0;
-    vector<double> cost(N, 0.);
-    vector<double> A(N, 0.);
-    vector<double> W(N, 0.);
-    vector<double> R(N, 0.);
-    vector<Result> result(N, Result());
-    
     fp.initResult();
+    alpha_base = fp.alpha();
+    alpha = alpha_base;
+    cerr << "alpha_base: " << alpha_base << endl;
+    
+    double oriArea = fp.Area();
+    Result orires = fp.storeResult();
+    
+    double avgA = 0, avgW = 0, avgUphill = 0, avgCost = 0;
+    vector<double> cost(initN, 0.);
+    vector<double> A(initN, 0.);
+    vector<double> W(initN, 0.);
+    vector<double> R(initN, 0.);
+    vector<Result> result(N, Result());
+    for (int i = 0; i < initN; ++i) { // perturb N initN
+        fp.perturb();
+        fp.pack();
+        result[i] = fp.storeResult();
+        A[i] = fp.Area();
+        W[i] = fp.HPWL();
+        R[i] = fp.curH() / fp.curW();
+        avgA += A[i];
+        avgW += W[i];
+    }
+    avgA /= initN; avgW /= initN;
+    cerr << "avgA: " << avgA << " avgW: " << avgW << endl;
+    if (fplans != 0) alpha = alpha_base + (1 - alpha_base) * f_fplans / fplans;
+    cerr << "alpha: " << alpha << endl;
+    for (int i = 0; i < initN; ++i) { // compute N costs
+        cost[i] = Cost(fp, alpha, A[i], avgA, W[i], avgW, R[i]);
+        result[i].cost = cost[i];
+		cerr << "cost: " << cost[i] << " orires: " << orires.cost << endl;
+        if (cost[i] > orires.cost) {
+            avgUphill += cost[i];
+        }
+        avgCost += cost[i];
+    }
+    avgUphill /= initN; avgCost /= initN;
+    cerr << "avgUphill: " << avgUphill << " avgCost: " << avgCost << endl;
+    
     while (T > T_LOWER_BOUND) {
         ++fplans;
-    cerr << fplans << endl;
-        Result orires = fp.storeResult();
-        for (int i = 0; i < N; ++i) { // perturb N times
+        cerr << "fplans: " << fplans << endl;
+        orires = fp.storeResult();
+        for (int i = 0; i < N; ++i) { // perturb N initN
             fp.perturb();
             fp.pack();
             result[i] = fp.storeResult();
@@ -43,12 +76,11 @@ void fastSA(Floorplanner& fp)
             R[i] = fp.curH() / fp.curW();
             avgA += A[i];
             avgW += W[i];
-    cerr << "HAHAHAH" << endl;
         }
         avgA /= N; avgW /= N;
-        
-        // adapt alpha
-        alpha = alpha_base + (1 - alpha_base) * f_fplans / fplans;
+        cerr << "avgA: " << avgA << " avgW: " << avgW << endl;
+        if (fplans != 0) alpha = alpha_base + (1 - alpha_base) * f_fplans / fplans;
+        cerr << "alpha: " << alpha << endl;
         for (int i = 0; i < N; ++i) { // compute N costs
             cost[i] = Cost(fp, alpha, A[i], avgA, W[i], avgW, R[i]);
             result[i].cost = cost[i];
@@ -58,10 +90,12 @@ void fastSA(Floorplanner& fp)
             avgCost += cost[i];
         }
         avgUphill /= N; avgCost /= N;
-        
+        cerr << "avgUphill: " << avgUphill << " avgCost: " << avgCost << endl;
+    
+    
         // adapt temperature
         if (fplans == 1) {
-            ORI_T = avgUphill  / log(P);
+            ORI_T =  -avgUphill / log(P);
             T = ORI_T;
         }
         else if (2 <= fplans <= K) {
@@ -74,7 +108,8 @@ void fastSA(Floorplanner& fp)
         for (int i = 0; i < N; ++i) {
             bestmove = result[i].cost < bestmove.cost? result[i] : bestmove;
         }
-        P = min(1., exp((bestmove.cost - orires.cost) / T));
+        P = min(1., exp( - (bestmove.cost - orires.cost) / T));
+        cerr << "P: " << P << endl;
         // decide if accept or not
         if (bestmove.cost - orires.cost > 0) {
             random_device rd;
@@ -87,9 +122,13 @@ void fastSA(Floorplanner& fp)
             else fp.restoreResult(orires);
         }
         else fp.restoreResult(bestmove);
+        cerr << "Current Cost: " << fp.getResult().cost << endl;
+
         if (fp.Area() <= fp.width() * fp.height()) ++f_fplans;
     }
     fp.pack();
+    cerr << "Origi Area: " << oriArea << endl;
+    cerr << "Final Area: " << fp.Area() << endl;
 }
 
 double Cost(Floorplanner& fp, double alpha, double A, double avgA,
@@ -98,8 +137,8 @@ double Cost(Floorplanner& fp, double alpha, double A, double avgA,
     double Ratio = fp.height() / fp.width();
     double a = alpha;
     double b = fp.beta();
-    return a * A / avgA + b * W / avgW + (1 - a - b) 
-            * (R - Ratio) * (R - Ratio);
+    return a * A/ avgA + (1- a) * W / avgW;
+    //return a * A / avgA + b * W / avgW + (1 - a - b) * (R - Ratio) * (R - Ratio);
 }
 
 }

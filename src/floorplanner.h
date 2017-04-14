@@ -86,7 +86,7 @@ class Floorplanner {
         Floorplanner() {}
         virtual ~Floorplanner() {}
 
-        void parse(double&, double&, string&, string&);
+        void parse(double&, string&, string&);
         void parseBlock(string&);
         void parseNet(string&);
         void gnuplot();
@@ -104,6 +104,7 @@ class Floorplanner {
         virtual Result  storeResult() = 0;
         virtual void    restoreResult(Result&) = 0;
         virtual void    keepBestResult(Result&) = 0;
+        virtual Result  getResult() = 0;
 
         // get
         int nNet() {return _nNet;}

@@ -6,10 +6,9 @@
 #include "floorplanner.h"
 
 
-void Floorplanner::parse(double& a, double& b, string& bfName, string& nfName)
+void Floorplanner::parse(double& a, string& bfName, string& nfName)
 {
     _alpha = a;
-    _beta = b;
     parseBlock(bfName);
     parseNet(nfName);
 }

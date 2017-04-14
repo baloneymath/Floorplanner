@@ -18,26 +18,20 @@ int main(int argc, char* argv[])
     clock_t start, stop;
     assert((start = clock()) != -1);
 
-    double alpha = atoi(argv[1]);
-    double beta = 0.5;
+    double alpha = stod(argv[1]);
     string bfile = argv[2];
     string nfile = argv[3];
     B_Tree bt;
-    bt.parse(alpha, beta, bfile, nfile);
+    bt.parse(alpha, bfile, nfile);
     bt.init();
     bt.pack();
     cout << "Area: " << bt.Area() << " HPWL:" << bt.HPWL() << endl;
-    //bt.gnuplot();
-    for (int i = 0; i < 5; ++i) {
-        bt.perturb(); cerr << "perturb ";
-        bt.pack(); cerr << "pack" << endl;
-    cout << "Area: " << bt.Area() << " HPWL:" << bt.HPWL() << endl << endl;
-        //bt.gnuplot();
-    }
+    bt.gnuplot();
     //bt.perturb();
     //bt.pack();
     //bt.gnuplot();
-    //fastSA::fastSA(bt);
+    fastSA::FastSA(bt);
+    bt.gnuplot();
     stop = clock();
     cout << "\nRuntime: " 
          << (double)(stop - start) / CLOCKS_PER_SEC 

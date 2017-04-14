@@ -156,19 +156,17 @@ void B_Tree::perturb()
 	switch (foo) {
 		case 0:
 			rotateBlock(_nodes[getRand()]);
-			//cerr << "rotate" << endl;
 			break;
 		case 1:
 			{
 				int c = getRand(), p = getRand();
+				while (p == c) p = getRand();
 				deleteNode(_nodes[c]);
 				insertNode(_nodes[p], _nodes[c], getRand() % 2);
-				//cerr << "delete & insert" << endl;
 				break;
 			}
 		case 2:
 			swapNode(_nodes[getRand()], _nodes[getRand()]);
-			//cerr << "swap" << endl;
 			break;
 		default:
 			break;	
@@ -184,104 +182,150 @@ void B_Tree::insertNode(Node* parent, Node* n, bool pickleft)
 {
 	if (parent == n) return;
 	n->parent = parent->id;
-	if (pickleft) {
-		if (parent->left != NIL) {
-			_nodes[parent->left]->parent = n->id;
-			if (getRand() % 2) n->left = parent->left;
-			else n->right = parent->left;
-		}
-		parent->left = n->id;
+	int old = pickleft? parent->left : parent->right;
+	if (getRand() % 2) {
+		n->left = old;
+		n->right = NIL;
 	}
 	else {
-		if (parent->right != NIL) {
-			_nodes[parent->right]->parent = n->id;
-			if (getRand() % 2) n->left = parent->right;
-			else n->right - parent->right;
-		}
-		parent->right = n->id;
+		n->left = NIL;
+		n->right = old;
 	}
+	if (old != NIL) _nodes[old]->parent = n->id;
+	if (pickleft) parent->left = n->id;
+	else parent->right = n->id;
 }
+
 
 void B_Tree::deleteNode(Node* n)
 {
-	Node* p = n->parent == NIL? 0 : _nodes[n->parent];
-	Node* l = n->left == NIL? 0 : _nodes[n->left];
-	Node* r = n->right == NIL? 0 : _nodes[n->right];
-	auto successor = [] (Node* n, vector<Node*> _nodes) -> int {
-		Node* tmp = n;
-		if (n->right != NIL) {
-			tmp = _nodes[n->right];
-			while (tmp->left != NIL) tmp = _nodes[tmp->left];
-			n = tmp;
-		}
-		else {
-			while (tmp->parent != NIL && _nodes[tmp->parent]->right == tmp->id) {
-				tmp = _nodes[tmp->parent];
-				tmp = tmp->parent == NIL? 0 : _nodes[tmp->parent];
+	int child = NIL, sibling = NIL, descendant = NIL;
+	if (!n->isleaf()) {
+		bool pickleft = (bool)(getRand() % 2);
+		if (n->left == NIL) pickleft = false; // make sure not NIL
+		if (n->right == NIL) pickleft = true;
+		if (pickleft) {
+			child = n->left;
+			if (n->right != NIL) {
+				descendant = _nodes[n->left]->right;
+				sibling = n->right;
+				_nodes[n->right]->parent = n->left;
+				_nodes[n->left]->right = n->right;
 			}
-			n = tmp->parent == NIL? 0 : _nodes[tmp->parent];
-		}
-		return n == 0? NIL : n->id;
-	};
-	if (n->right == NIL) {
-		if (n->left != NIL) l->parent = n->parent;
-		if (p->left == n->id) p->left = n->left;
-		else p->right = n->left;
-		n->parent = n->left = n->right = NIL;
-		if (n == _root) _root = _nodes[n->left];
-	}
-	else {
-		int t = successor(n, _nodes);
-		Node* s = t == NIL? 0 : _nodes[t];
-		if (s == 0) { // n is right most
-			p->right = NIL;
+			_nodes[n->left]->parent = n->parent;
 		}
 		else {
-			swapNode(s, n);
-			deleteNode(n);
+			child = n->right;
+			if (n->left != NIL) {
+				descendant = _nodes[n->right]->left;
+				sibling = n->left;
+				_nodes[n->left]->parent = n->right;
+				_nodes[n->right]->left = n->left;
+			}
+			_nodes[n->right]->parent = n->parent;
 		}
 	}
-
+	if (n->parent == NIL) _root = _nodes[child];
+	else {
+		if (n->id == _nodes[n->parent]->left) {
+			_nodes[n->parent]->left = child;
+		}
+		else _nodes[n->parent]->right = child;
+	}
+	if (descendant != NIL) {
+		Node* d = _nodes[descendant];
+		while (1) {
+			Node* p = _nodes[sibling];
+			if (p->left == NIL && p->right == NIL) {
+				d->parent = p->id;
+				if (getRand() % 2) p->left = d->id;
+				else p->right = d->id;
+				break;
+			}
+			else if (p->left == NIL) {
+				d->parent = p->id;
+				p->left = d->id;
+				break;
+			}
+			else if (p->right == NIL) {
+				d->parent = p->id;
+				p->right = d->id;
+				break;
+			}
+			else sibling = getRand() % 2? p->left : p->right;
+		}
+	}
 }
 
-void B_Tree::swapNode(Node* n1, Node* n2) 
+void B_Tree::__swapNode(Node* n1, Node* n2)
 {
-	if (n1 == n2) return;
-	if (_root == n1) _root = n2;
-	else if (_root == n2) _root = n1;
-	auto __swapNode  = [] (Node* n1, Node* n2, vector<Node*> _nodes) {
-		if (n1->left != NIL) _nodes[n1->left]->parent = n2->id;
-		if (n1->right != NIL) _nodes[n1->right]->parent = n2->id;
+	if (n1->left != NIL) _nodes[n1->left]->parent = n2->id;
+	if (n1->right != NIL) _nodes[n1->right]->parent = n2->id;
+	if (n2->left != NIL) _nodes[n2->left]->parent = n1->id;
+	if (n2->right != NIL) _nodes[n2->right]->parent = n1->id;
+	if (n1->parent != n1->id) {
 		if (n1->parent != NIL) {
 			Node* p = _nodes[n1->parent];
 			if (p->left == n1->id) p->left = n2->id;
 			else p->right = n2->id;
 		}
-		if (n2->left != NIL) _nodes[n2->left]->parent = n1->id;
-		if (n2->right != NIL) _nodes[n2->right]->parent = n1->id;
+		else _root = _nodes[n2->id];
+	}
+	if (n2->parent != n2->id) {
 		if (n2->parent != NIL) {
 			Node* p = _nodes[n2->parent];
 			if (p->left == n2->id) p->left = n1->id;
 			else p->right = n1->id;
 		}
-		swap(n1->parent, n2->parent);
-		swap(n1->left, n2->left);
-		swap(n1->right, n2->right);
-	};
+		else _root = _nodes[n1->id];
+	}
+	swap(n1->parent, n2->parent);
+	swap(n1->left, n2->left);
+	swap(n1->right, n2->right);
+}
+
+void B_Tree::swapNode(Node* n1, Node* n2) 
+{
+	if (n1 == n2) return;
 	if (n1->parent != n2->id && n2->parent != n1->id) { // not connected
-		__swapNode(n1, n2, _nodes);
+		__swapNode(n1, n2);
 	}
 	else { // connected node
-		Node* tmp1 = n1;
-		Node* tmp2 = n2;
-		if (n2->parent != n1->id) swap(tmp1, tmp2);
-		bool isleft = tmp1->left == tmp2->id? true : false;
-		if (tmp1->left == tmp2->id) tmp1->left = NIL;
-		else tmp1->right = NIL;
-		__swapNode(tmp1, tmp2, _nodes);
-		tmp1->parent = tmp2->id;
-		if (isleft) tmp2->left = tmp1->id;
-		else tmp2->right = tmp1->id;
+		bool parentn1 = n1->id == n2->parent? true : false;
+		bool isleft;
+		if (parentn1) {
+			if (n1->left == n2->id) {
+				n1->left = NIL;
+				isleft = true;
+			}
+			else {
+				n1->right = NIL;
+				isleft = false;
+			}
+			n2->parent = n2->id;
+		}
+		else {
+			if (n2->left == n1->id) {
+				n2->left = NIL;
+				isleft = true;
+			}
+			else {
+				n2->right = NIL;
+				isleft = false;
+			}
+			n1->parent = n1->id;
+		}
+		__swapNode(n1, n2);
+		if (parentn1) {
+			n1->parent = n2->id;
+			if (isleft) n2->left = n1->id;
+			else n2->right = n1->id;
+		}
+		else {
+			n2->parent = n1->id;
+			if (isleft) n1->left = n2->id;
+			else n1->right = n2->id;
+		}
 	}
 }
 
@@ -318,7 +362,7 @@ void B_Tree::initResult()
 		_cur.nodes[i] = *_nodes[i];
 	}
 	// init cost => norm = 1
-	_cur.cost = DBL_MAX;
+	_cur.cost = 1.;
 	_best = _cur;
 }
 
@@ -343,4 +387,9 @@ void B_Tree::keepBestResult(Result& re)
 	if (_best.cost > re.cost) {
 		_best = re;
 	}
+}
+
+Result B_Tree::getResult()
+{
+	return _cur;
 }

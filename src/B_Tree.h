@@ -35,6 +35,9 @@ struct Node {
         left = l;
         right = r;
     }
+    bool    isleaf() {
+        return left == NIL && right == NIL;
+    }
     Block*  data;
     int     id;
     int     parent, left, right;
@@ -57,7 +60,7 @@ struct Contour {
 struct Result {
     Result() {
         root;
-        cost = DBL_MAX;
+        cost = 1.;
     }
     Node root;
     vector<Node> nodes;
@@ -84,6 +87,7 @@ class B_Tree : public Floorplanner {
         virtual Result  storeResult();
         virtual void    restoreResult(Result&);
         virtual void    keepBestResult(Result&);
+        virtual Result  getResult();
 
     protected:
         // packing
@@ -97,7 +101,7 @@ class B_Tree : public Floorplanner {
         void    insertNode(Node*, Node*, bool);
         void    deleteNode(Node*);
         void    swapNode(Node*, Node*);
-        
+        void    __swapNode(Node*, Node*);
         int     getRand();
     private:
         Node*           _root;
