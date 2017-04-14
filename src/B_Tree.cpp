@@ -144,11 +144,11 @@ void B_Tree::perturb()
 	mt19937 gen(rd());
 	uniform_int_distribution<> dis(0, _nBlock - 1);
 	int n1 = dis(gen), n2 = dis(gen);
-	swapNode(_nodes[n1], _nodes[n2]);
-	for (int i = 0; i < 3; ++i) {
-		rotateBlock(_nodes[dis(gen)]);
-	}
-	//deleteNode(_nodes[1]);
+	//swapNode(_nodes[n1], _nodes[n2]);
+	//for (int i = 0; i < 3; ++i) {
+	//	rotateBlock(_nodes[dis(gen)]);
+	//}
+	deleteNode(_nodes[1]);
 }
 
 void B_Tree::rotateBlock(Node* n)
@@ -162,6 +162,82 @@ void B_Tree::insertNode(Node* parent, Node* n, bool isleft)
 
 void B_Tree::deleteNode(Node* n)
 {
+	Node* p = n->parent == NIL? 0 : _nodes[n->parent];
+	Node* l = n->left == NIL? 0 : _nodes[n->left];
+	Node* r = n->right == NIL? 0 : _nodes[n->right];
+	/*if (n->left == NIL && n->right == NIL) {
+		if (n->parent != NIL) {
+			if (n->id == p->left) p->left = NIL;
+			else p->right = NIL;
+		}
+	}
+	else if (n->left != NIL && n->right == NIL) {
+		if (n->parent == NIL) {
+			_root = n->left;
+			l->parent = NIL;
+		}
+		else {
+			if (n->id == p->left) p->left = n->left;
+			else p->right = n->left;
+			l->parent = p->id;
+		}
+	}
+	else if (n->left == NIL && n->right != NIL) {
+		if (n->parent == NIL) {
+			_root = n->right;
+			r->parent = NIL;
+		}
+		else {
+			if (n->id == p->right) p->right = n->right;
+			else p->left = n->right;
+			r->parent = p->id;
+		}
+	}
+	else {
+		bool pickleft = rand() % 2? true : false; // pick left or right child
+		if (pickleft) {
+
+		}
+	}*/
+	auto successor = [] (Node* n, vector<Node*> _nodes) -> int {
+		Node* tmp = n;
+		if (n->right != NIL) {
+			tmp = _nodes[n->right];
+			while (tmp->left != NIL) tmp = _nodes[tmp->left];
+			n = tmp;
+		}
+		else {
+			while (tmp->parent != NIL && _nodes[tmp->parent]->right == tmp->id) {
+				tmp = _nodes[tmp->parent];
+				tmp = tmp->parent == NIL? 0 : _nodes[tmp->parent];
+			}
+			n = tmp->parent == NIL? 0 : _nodes[tmp->parent];
+		}
+		return n == 0? NIL : n->id;
+	};
+	if (_root == n) {
+		int t = successor(n, _nodes);
+		_root = t == NIL? 0 : _nodes[t];
+	}
+	if (n->right == NIL) {
+		if (n->left != NIL) l->parent = n->parent;
+		if (p->left == n->id) p->left = n->left;
+		else p->right = n->left;
+	}
+	else {
+		int t = successor(n, _nodes);
+		Node* s = t == NIL? 0 : _nodes[t];
+		if (s == 0) { // n is right most
+			p->right = NIL;
+		}
+		else {
+			swap(s, n);
+			deleteNode(s);
+		}
+	}
+	
+
+
 }
 
 void B_Tree::swapNode(Node* n1, Node* n2) 

@@ -27,6 +27,10 @@ int main(int argc, char* argv[])
     bt.init();
     bt.pack();
     bt.gnuplot();
+    bt.perturb();
+    bt.unpack();
+    bt.pack();
+    bt.gnuplot();
     //cout << bt.HPWL() << endl;
     //cout << bt.Area() << endl;
     //fastSA::fastSA(bt);
