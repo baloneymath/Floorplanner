@@ -175,7 +175,7 @@ void B_Tree::perturb()
 
 void B_Tree::rotateBlock(Node* n)
 {
-	n->data->rotate = true;
+	n->data->rotate ^= 1;
 }
 
 void B_Tree::insertNode(Node* parent, Node* n, bool pickleft)
@@ -362,7 +362,7 @@ void B_Tree::initResult()
 		_cur.nodes[i] = *_nodes[i];
 	}
 	// init cost => norm = 1
-	_cur.cost = 1.;
+	_cur.cost = 0;
 	_best = _cur;
 }
 

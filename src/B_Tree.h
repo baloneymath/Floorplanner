@@ -60,7 +60,7 @@ struct Contour {
 struct Result {
     Result() {
         root;
-        cost = 1.;
+        cost = 0;
     }
     Node root;
     vector<Node> nodes;

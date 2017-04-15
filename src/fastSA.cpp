@@ -10,9 +10,9 @@ namespace fastSA {
 double  T = 10, ORI_T = 0;
 double  P = 0.99; // initial acceptance rate
 const int K = 7;
-const int initN = 10; // inital perturbs
-const int N = 10; // how many tries per iteration
-const double C = 150.;
+const int initN = 20; // inital perturbs
+const int N = 30; // how many tries per iteration
+const double C = 200.;
 const double T_LOWER_BOUND = 0.0001;
 const double C_LOWER_BOUND = 0.0001;
 double alpha = 0;
@@ -32,11 +32,13 @@ void FastSA(Floorplanner& fp)
     Result orires = fp.storeResult();
     
     double avgA = 0, avgW = 0, avgUphill = 0, avgCost = 0;
-    vector<double> cost(initN, 0.);
-    vector<double> A(initN, 0.);
-    vector<double> W(initN, 0.);
-    vector<double> R(initN, 0.);
-    vector<Result> result(N, Result());
+    vector<double> cost(max(initN, N), 0.);
+    vector<double> A(max(initN, N), 0.);
+    vector<double> W(max(initN, N), 0.);
+    vector<double> R(max(initN, N), 0.);
+    vector<Result> result(max(initN, N), Result());
+    
+    // initial perturb
     for (int i = 0; i < initN; ++i) { // perturb N initN
         fp.perturb();
         fp.pack();
@@ -63,6 +65,7 @@ void FastSA(Floorplanner& fp)
     avgUphill /= initN; avgCost /= initN;
     cerr << "avgUphill: " << avgUphill << " avgCost: " << avgCost << endl;
     
+    // start SA
     while (T > T_LOWER_BOUND) {
         ++fplans;
         cerr << "fplans: " << fplans << endl;
@@ -137,8 +140,8 @@ double Cost(Floorplanner& fp, double alpha, double A, double avgA,
     double Ratio = fp.height() / fp.width();
     double a = alpha;
     double b = fp.beta();
-    return a * A/ avgA + (1- a) * W / avgW;
-    //return a * A / avgA + b * W / avgW + (1 - a - b) * (R - Ratio) * (R - Ratio);
+    //return a * A/ avgA + (1- a) * W / avgW;
+    return a * A / avgA + b * W / avgW + (1 - a - b) * (R - Ratio) * (R - Ratio);
 }
 
 }

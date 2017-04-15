@@ -63,12 +63,6 @@ struct Block {
     static bool bigger(Block* b1, Block* b2) {
         return b1->width * b1->height > b2->width * b2->height;
     }
-    static bool lesserX(Block* b1, Block* b2) {
-        return b1->leftdown.first < b2->leftdown.first;
-    }
-    static bool lesserY(Block* b1, Block* b2) {
-        return b1->leftdown.second < b2->leftdown.second;
-    }
     
     string      name;
     double      width;
