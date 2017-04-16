@@ -84,7 +84,6 @@ class B_Tree : public Floorplanner {
 
         // for SA
         virtual void    initResult();
-        virtual Result  storeResult();
         virtual void    restoreResult(Result&);
         virtual void    keepBestResult(Result&);
         virtual Result  getResult();

@@ -127,7 +127,9 @@ void Floorplanner::gnuplot()
     gplt << "set yrange [" << 0 << ":" << yr << "]" << endl;
     gplt << "set size ratio -1" << endl;
     gplt << "set object 1 rect from 0,0 to " << _width
-         << "," << _height << "fc rgb \"yellow\" back" << endl;
+         << "," << _height << "fc rgb \"#FFFF99\" back" << endl;
+    //gplt << "set object 2 rect from 0,0 to " << _height
+    //     << "," << _width << "fc rgb \"#CCFFFF\" back" << endl;
     for (int i = 0; i < _nBlock; ++i) {
         Block* b = _blocks[i];
         if (b->leftdown == make_pair(-1., -1.)) continue;
@@ -137,14 +139,14 @@ void Floorplanner::gnuplot()
         }
         gplt << " set label \"" << b->name << "\" at "
              << b->center().first << "," << b->center().second << endl;
-        gplt << " set object " << i + 2 << " rect from "
+        gplt << " set object " << i + 3 << " rect from "
              << b->leftdown.first << ","
              << b->leftdown.second << " to "
              << b->leftdown.first + w << ","
              << b->leftdown.second + h << " fc rgb \"green\" " << endl;
-        gplt << " plot \'-\' w p ls 1" << endl;
-        gplt << " 0 0" << endl;
-        gplt << " e" << endl;
-        gplt << " pause -1" << endl;
     }
+    gplt << " plot \'-\' w p ls 1" << endl;
+    gplt << " 0 0" << endl;
+    gplt << " e" << endl;
+    gplt << " pause -1" << endl;
 }

@@ -16,17 +16,23 @@ namespace fastSA {
 extern double  T, ORI_T;
 extern double  P; // initial acceptance rate
 extern const int K;
-extern const int initN;
-extern const int N; // how many tries per iteration
 extern const double C;
 extern const double T_LOWER_BOUND;
+extern int initN;
+extern int N; // how many tries per iteration
 extern double alpha;
 extern double alpha_base;
 extern double fplans;
 extern double f_fplans; // feasable
+extern double normA;
+extern double normW;
+extern double avgUphill;
+extern double avgCost;
 
+void initNorm(Floorplanner&, int);
+void initPerturb(Floorplanner&, int);
 void FastSA(Floorplanner&);
-double Cost(Floorplanner&, double, double, double, double, double, double);
+double Cost(Floorplanner&);
 
 }
 #endif

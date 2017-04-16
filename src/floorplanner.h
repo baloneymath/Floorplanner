@@ -95,7 +95,6 @@ class Floorplanner {
         
         // for SA
         virtual void    initResult() = 0;
-        virtual Result  storeResult() = 0;
         virtual void    restoreResult(Result&) = 0;
         virtual void    keepBestResult(Result&) = 0;
         virtual Result  getResult() = 0;
