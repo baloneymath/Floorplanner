@@ -126,10 +126,10 @@ void Floorplanner::gnuplot()
     gplt << "set xrange [" << 0 << ":" << xr << "]" << endl;
     gplt << "set yrange [" << 0 << ":" << yr << "]" << endl;
     gplt << "set size ratio -1" << endl;
-    gplt << "set object 1 rect from 0,0 to " << _width
+    gplt << "set object 1 rect from 0,0 to " << _height
+         << "," << _width << "fc rgb \"#CCFFFF\" back" << endl;
+    gplt << "set object 2 rect from 0,0 to " << _width
          << "," << _height << "fc rgb \"#FFFF99\" back" << endl;
-    //gplt << "set object 2 rect from 0,0 to " << _height
-    //     << "," << _width << "fc rgb \"#CCFFFF\" back" << endl;
     for (int i = 0; i < _nBlock; ++i) {
         Block* b = _blocks[i];
         if (b->leftdown == make_pair(-1., -1.)) continue;

@@ -47,6 +47,14 @@ struct Terminal {
 
 struct Block {
     Block() {}
+    Block(const Block& b) {
+        name = b.name;
+        width = b.width;
+        height = b.height;
+        rotate = b.rotate;
+        leftdown = b.leftdown;
+        nets = b.nets;
+    }
     Block(string n = "", int w = 0, int h = 0, 
         bool r = 0, Location loc = make_pair(-1, -1)):
         name(n), width(w), height(h), rotate(r), leftdown(loc) {}
@@ -95,8 +103,7 @@ class Floorplanner {
         
         // for SA
         virtual void    initResult() = 0;
-        virtual void    restoreResult(Result&) = 0;
-        virtual void    keepBestResult(Result&) = 0;
+        virtual void    restoreResult(Result) = 0;
         virtual Result  getResult() = 0;
 
         // get

@@ -366,17 +366,9 @@ Result B_Tree::getResult()
     return _cur;
 }
 
-void B_Tree::restoreResult(Result& re)
+void B_Tree::restoreResult(Result re)
 {
     _cur.root = re.root;
     _cur.nodes = re.nodes;
     _cur.cost = re.cost;
 }
-
-void B_Tree::keepBestResult(Result& re)
-{
-    if (_best.cost > re.cost) {
-        _best = re;
-    }
-}
-

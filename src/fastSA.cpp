@@ -16,7 +16,7 @@ int initN = 0; // inital perturbs
 int N = 0; // how many tries per iteration
 double alpha = 0;
 double alpha_base = 0;
-double beta = 0.1;
+double beta = 0;
 double fplans = 0;
 double f_fplans = 0;
 
@@ -48,7 +48,11 @@ void initPerturb(Floorplanner& fp, int times)
 {
     avgUphill = 0;
     double cost = 0, up = 0;
-    double pre = fp.getResult().cost;
+    Result origin = fp.getResult();
+    origin.cost = Cost(fp);
+    fp.restoreResult(origin);
+    double pre = origin.cost;
+
     while (avgUphill == 0) {
         up = 0;
         for (int i = 0; i < times; ++i) {
@@ -63,15 +67,15 @@ void initPerturb(Floorplanner& fp, int times)
         }
     }
     avgUphill /= up;
-
 }
 
 double Cost(Floorplanner& fp)
 {
     double H = fp.curH(), W = fp.curW();
-    if (W < H) swap(W, H);
     double fpH = fp.height(), fpW = fp.width();
+    if (W < H) swap(W, H);
     if (fpW < fpH) swap(fpW, fpH);
+    
     double dR = H / W - fpH / fpW;
     double a = alpha;
     double b = beta;
@@ -79,9 +83,21 @@ double Cost(Floorplanner& fp)
     return a * fp.Area() / normA + b * fp.HPWL() / normW + (1 - a - b) * dR * dR;
 }
 
+bool isFit(Floorplanner& fp)
+{
+    double H = fp.curH(), W = fp.curW();
+    double fpH = fp.height(), fpW = fp.width();
+    if (W < H) swap(W, H);
+    if (fpW < fpH) swap(fpW, fpH);
+
+    if (H <= fpH && W <= fpW) return true;
+    else return false;
+}
+
+
 void FastSA(Floorplanner& fp)
 {
-    Result origin = fp.getResult();
+    cout << "Start SA..." << endl;
     double oriArea = fp.Area();
     
     alpha_base = fp.alpha();
@@ -89,7 +105,7 @@ void FastSA(Floorplanner& fp)
     cerr << "alpha_base: " << alpha_base << endl;
 
     initN = 3 * fp.nBlock();
-    N     = 3 * fp.nBlock();
+    N     = 5 * fp.nBlock();
 
     initNorm(fp, initN);
     initPerturb(fp, initN);
@@ -99,6 +115,7 @@ void FastSA(Floorplanner& fp)
     T = ORI_T;
     cerr << "Init T: " << T << endl;
     Result best = fp.getResult();
+    Result bestfit = fp.getResult();
     Result pre = fp.getResult();
     int reject = 0;
     while (T > T_LOWER_BOUND) {
@@ -113,14 +130,21 @@ void FastSA(Floorplanner& fp)
             cost = Cost(fp);
             avgCost += fabs(cost - pre.cost);
             P = min(1., exp(-(cost - pre.cost) / T));
-            if (cost < pre.cost || (double)(rand() % 100) / 100 < P) {
+            if (cost < pre.cost || (double)(rand() % 100 + 1) / 100 <= P) {
                 pre = fp.getResult();
                 pre.cost = cost;
                 if (cost < best.cost) {
                     best.cost = cost;
                     best = fp.getResult();
-                    if (fp.curW() <= fp.width() && fp.curH() <= fp.width())
+                    if (isFit(fp)) {
                         ++f_fplans;
+                        bestfit = fp.getResult();
+                        cerr << fp.getResult().cost << endl;
+                        fp.gnuplot();
+                        cerr << fp.Area() << endl;
+                        cerr << normA << endl;
+                        //exit(0);
+                    }
                     alpha = alpha_base + (1 - alpha_base) * f_fplans / fplans;
                     fp.restoreResult(best);
                 }
@@ -136,16 +160,19 @@ void FastSA(Floorplanner& fp)
         }
         else T = ORI_T * avgCost / fplans;
        
+        cerr << "alpha: " << alpha << endl;
         cerr << "P: " << P << " T: " << T << endl;
         cerr << "Current Cost: " << fp.getResult().cost << endl;
         //cerr << "Reject %: " << (double)reject / N  << endl;
         //if ((double)reject / N > 0.99)  break;
 
     }
+    fp.restoreResult(best);
     fp.pack();
     cerr << "Origi Area: " << oriArea << endl;
     cerr << "Final Area: " << fp.Area() << endl;
     cout << "Finish SA..." << endl;
+    cerr << pre.cost << ' ' << Cost(fp) << ' ' << bestfit.cost << endl;
 }
 
 }

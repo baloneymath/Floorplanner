@@ -33,6 +33,7 @@ void initNorm(Floorplanner&, int);
 void initPerturb(Floorplanner&, int);
 void FastSA(Floorplanner&);
 double Cost(Floorplanner&);
+bool isFit(Floorplanner&);
 
 }
 #endif
