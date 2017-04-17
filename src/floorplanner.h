@@ -99,12 +99,18 @@ class Floorplanner {
         virtual void perturb() = 0;
 
         double HPWL();
-        virtual double Area() = 0;
         
         // for SA
         virtual void    initResult() = 0;
-        virtual void    restoreResult(Result) = 0;
-        virtual Result  getResult() = 0;
+        virtual Result  getCurResult() = 0;
+        virtual Result  getBestResult() = 0;
+        virtual void    keepCurResult() = 0;
+        virtual void    keepBestResult() = 0;
+        virtual void    recoverBest() = 0;
+        virtual void    recoverCur() = 0;
+
+        void            initNorm(int);
+        double          Cost();
 
         // get
         int nNet() {return _nNet;}
@@ -116,16 +122,23 @@ class Floorplanner {
         double height() {return _height;}
         double curW() {return _curW;}      
         double curH() {return _curH;}      
+        double curA() {return _curA;}      
         vector<Net*>        nets() {return _nets;}
         vector<Block*>      blocks() {return _blocks;}
         vector<Terminal*>   terminals() {return _terminals;}  
         StringIntMap        blocksMap() {return _blocksMap;}
         StringIntMap        terminalsMap() {return _terminalsMap;}
+        // set
+        void setalpha(double a) {_alpha = a;}
+        void setbeta(double b) {_beta = b;}
+
     protected:
         // Outlines, basic
+        double  _orialpha;
         double  _alpha, _beta;
         double  _width, _height;
-        double  _curW, _curH;
+        double  _curW, _curH, _curA;
+        double  _normA, _normW;
         int     _nNet, _nBlock, _nTerminal;
 
         // name map

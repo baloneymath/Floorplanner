@@ -159,7 +159,7 @@ void B_Tree::perturb()
                 int c = getRand(), p = getRand();
                 while (p == c) p = getRand();
                 deleteNode(_nodes[c]);
-                insertNode(_nodes[p], _nodes[c], getRand() % 2);
+                insertNode(_nodes[p], _nodes[c]);
                 break;
             }
         case 2:
@@ -173,10 +173,11 @@ void B_Tree::rotateBlock(Node* n)
     n->data->rotate ^= 1;
 }
 
-void B_Tree::insertNode(Node* parent, Node* n, bool pickleft)
+void B_Tree::insertNode(Node* parent, Node* n)
 {
     if (parent == n) return;
     n->parent = parent->id;
+    bool pickleft = getRand() % 2;
     int old = pickleft? parent->left : parent->right;
     if (old != NIL) _nodes[old]->parent = n->id;
     if (pickleft) parent->left = n->id;
@@ -196,7 +197,7 @@ void B_Tree::deleteNode(Node* n)
 {
     int child = NIL, sibling = NIL, descendant = NIL;
     if (!n->isleaf()) {
-        bool pickleft = (bool)(getRand() % 2);
+        bool pickleft = getRand() % 2;
         if (n->left == NIL) pickleft = false; // make sure not NIL
         if (n->right == NIL) pickleft = true;
         if (pickleft) {
@@ -324,18 +325,6 @@ void B_Tree::swapNode(Node* n1, Node* n2)
     }
 }
 
-double B_Tree::Area()
-{
-    double width = 0, height = 0;
-    for (auto i : _yContour) {
-        double x = i.data->width, y = i.data->height;
-        if (i.data->rotate) swap(x, y);
-        width = max(width, i.data->leftdown.first + x);
-        height = max(height, i.data->leftdown.second + y);
-    }
-    return width * height;
-}
-
 void B_Tree::updateCurrent()
 {
     double width = 0, height = 0;
@@ -347,28 +336,57 @@ void B_Tree::updateCurrent()
     }
     _curW = width;
     _curH = height;
+    _curA = width * height;
 }
 
 void B_Tree::initResult()
 {
     _cur.root = *_root;
     _cur.nodes.resize(_nBlock);
-    for (int i = 0; i < _nBlock; ++i) {
+    _cur.rotates.resize(_nBlock);
+    for (int i = 0; i < _nBlock; ++i)
         _cur.nodes[i] = *_nodes[i];
-    }
+    for (int i = 0; i < _nBlock; ++i)
+        _cur.rotates[i] = _nodes[i]->data->rotate;
     // init cost => norm = 1
     _cur.cost = 1;
     _best = _cur;
 }
 
-Result B_Tree::getResult()
+void B_Tree::keepCurResult()
 {
-    return _cur;
+    _cur.root = *_root;
+    for (int i = 0; i < _nBlock; ++i)
+        _cur.nodes[i] = *_nodes[i];
+    for (int i = 0; i < _nBlock; ++i)
+        _cur.rotates[i] = _nodes[i]->data->rotate;
+    _cur.cost = Cost();
 }
 
-void B_Tree::restoreResult(Result re)
+void B_Tree::keepBestResult()
 {
-    _cur.root = re.root;
-    _cur.nodes = re.nodes;
-    _cur.cost = re.cost;
+    _best.root = *_root;
+    for (int i = 0; i < _nBlock; ++i)
+        _best.nodes[i] = *_nodes[i];
+    for (int i = 0; i < _nBlock; ++i)
+        _best.rotates[i] = _nodes[i]->data->rotate;
+    _best.cost = Cost();
+}
+
+void B_Tree::recoverCur()
+{
+    for (int i = 0; i < _nBlock; ++i)
+        *_nodes[i] = _cur.nodes[i];
+    for (int i = 0; i < _nBlock; ++i)
+        _nodes[i]->data->rotate = _cur.rotates[i];
+    _root = _nodes[_cur.root.id];
+}
+
+void B_Tree::recoverBest()
+{
+    for (int i = 0; i < _nBlock; ++i)
+        *_nodes[i] = _best.nodes[i];
+    for (int i = 0; i < _nBlock; ++i)
+        _nodes[i]->data->rotate = _best.rotates[i];
+    _root = _nodes[_best.root.id];
 }

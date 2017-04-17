@@ -8,7 +8,9 @@
 
 void Floorplanner::parse(double& a, string& bfName, string& nfName)
 {
-    _alpha = a;
+    _alpha = 0.4;
+    _beta = 0.2;
+    _orialpha = a;
     parseBlock(bfName);
     parseNet(nfName);
 }
@@ -119,6 +121,33 @@ double Floorplanner::HPWL()
     return val;
 }
 
+void Floorplanner::initNorm(int times)
+{   
+    _normA = _normW = 0;
+    for (int i = 0; i < times; ++i) {
+        perturb();
+        pack();
+        _normA += _curA;
+        _normW += HPWL();
+    }
+    _normA /= times;
+    _normW /= times;
+}
+
+double Floorplanner::Cost()
+{
+    double H = _curH, W = _curW;
+    double fpH = _height, fpW = _width;
+    //if (W < H) swap(W, H);
+    //if (fpW < fpH) swap(fpW, fpH);
+    
+    double dR = H / W - fpH / fpW;
+    double a = _alpha;
+    double b = _beta;
+    //return a * _curA / _normA + (1 - a) * HPWL() / _normW;
+    return a * _curA / _normA + b * HPWL() / _normW + (1 - a - b) * dR * dR;
+}
+
 void Floorplanner::gnuplot()
 {
     Gnuplot gplt;
@@ -145,7 +174,8 @@ void Floorplanner::gnuplot()
              << b->leftdown.first + w << ","
              << b->leftdown.second + h << " fc rgb \"green\" " << endl;
     }
-    gplt << " plot \'-\' w p ls 1" << endl;
+    //gplt << " plot \'-\' w p ls 1" << endl;
+    gplt << " plot \'-\' using 1:2 t \"\" with line" << endl;
     gplt << " 0 0" << endl;
     gplt << " e" << endl;
     gplt << " pause -1" << endl;

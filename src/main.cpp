@@ -25,9 +25,18 @@ int main(int argc, char* argv[])
     bt.parse(alpha, bfile, nfile);
     bt.init();
     bt.pack();
-    cout << "Area: " << bt.Area() << " HPWL:" << bt.HPWL() << endl;
+    cout << "Area: " << bt.curA() << " HPWL:" << bt.HPWL() << endl;
     bt.gnuplot();
+    //bt.initResult();
+    //bt.keepCurResult();
     //bt.perturb();
+    //bt.perturb();
+    //bt.pack();
+    //bt.gnuplot();
+    //bt.recoverCur();
+    //bt.pack();
+    //bt.gnuplot();
+
     //bt.pack();
     //bt.gnuplot();
     fastSA::FastSA(bt);

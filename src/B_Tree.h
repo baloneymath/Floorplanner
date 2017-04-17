@@ -64,6 +64,7 @@ struct Result {
     }
     Node root;
     vector<Node> nodes;
+    vector<bool> rotates;
     double cost;
 };
 
@@ -80,12 +81,15 @@ class B_Tree : public Floorplanner {
         virtual void unpack();
         virtual void perturb();
 
-        virtual double Area();
 
         // for SA
         virtual void    initResult();
-        virtual void    restoreResult(Result);
-        virtual Result  getResult();
+        virtual Result  getCurResult() {return _cur;}
+        virtual Result  getBestResult() {return _best;}
+        virtual void    keepCurResult();
+        virtual void    keepBestResult();
+        virtual void    recoverBest();
+        virtual void    recoverCur();
 
     protected:
         // packing
@@ -96,7 +100,7 @@ class B_Tree : public Floorplanner {
 
         // perturb
         void    rotateBlock(Node*);
-        void    insertNode(Node*, Node*, bool);
+        void    insertNode(Node*, Node*);
         void    deleteNode(Node*);
         void    swapNode(Node*, Node*);
         void    __swapNode(Node*, Node*);
