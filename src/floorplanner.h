@@ -91,6 +91,7 @@ class Floorplanner {
         void parse(double&, string&, string&);
         void parseBlock(string&);
         void parseNet(string&);
+        void outfile(string&, double);
         void gnuplot();
         
         virtual void init() = 0;
@@ -98,7 +99,8 @@ class Floorplanner {
         virtual void unpack() = 0;
         virtual void perturb() = 0;
 
-        double HPWL();
+        double  HPWL();
+        void    flip(); 
         
         // for SA
         virtual void    initResult() = 0;
@@ -110,6 +112,7 @@ class Floorplanner {
         virtual void    recoverCur() = 0;
 
         void            initNorm(int);
+        bool            isfit();
         double          Cost();
 
         // get
@@ -117,6 +120,7 @@ class Floorplanner {
         int nBlock() {return _nBlock;}
         int nTerminal() {return _nTerminal;}
         double alpha() {return _alpha;}
+        double orialpha() {return _orialpha;}
         double beta() {return _beta;}
         double width() {return _width;}
         double height() {return _height;}

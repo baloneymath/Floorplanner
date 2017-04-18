@@ -380,6 +380,7 @@ void B_Tree::recoverCur()
     for (int i = 0; i < _nBlock; ++i)
         _nodes[i]->data->rotate = _cur.rotates[i];
     _root = _nodes[_cur.root.id];
+    updateCurrent();
 }
 
 void B_Tree::recoverBest()
@@ -389,4 +390,5 @@ void B_Tree::recoverBest()
     for (int i = 0; i < _nBlock; ++i)
         _nodes[i]->data->rotate = _best.rotates[i];
     _root = _nodes[_best.root.id];
+    updateCurrent();
 }

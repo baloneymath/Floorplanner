@@ -11,29 +11,29 @@
 #include <limits>
 using namespace std;
 
-namespace fastSA {
+class FastSA {
+	public:
+		FastSA();
+		void initPerturb(Floorplanner&, int);
+		void simulate(Floorplanner&);
 
-extern double  T, ORI_T;
-extern double  P; // initial acceptance rate
-extern const int K;
-extern const double C;
-extern const double T_LOWER_BOUND;
-extern int initN;
-extern int N; // how many tries per iteration
-extern double alpha;
-extern double alpha_base;
-extern double fplans;
-extern double f_fplans; // feasable
-extern double normA;
-extern double normW;
-extern double avgUphill;
-extern double avgCost;
+	private:
+		double  T, ORI_T;
+		double  P; // initial acceptance rate
+		int 	K;
+		double 	C;
+		double 	T_LOWER_BOUND;
+		int 	initN;
+		int 	N; // how many tries per iteration
+		double 	alpha;
+		double 	alpha_base;
+		double 	beta;
+		double 	fplans;
+		double 	f_fplans; // feasable
+		double 	avgUphill;
+		double 	avgCost;
+};
 
-void initNorm(Floorplanner&, int);
-void initPerturb(Floorplanner&, int);
-void FastSA(Floorplanner&);
-double Cost(Floorplanner&);
-bool isFit(Floorplanner&);
 
-}
+
 #endif

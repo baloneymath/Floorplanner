@@ -8,8 +8,8 @@
 
 void Floorplanner::parse(double& a, string& bfName, string& nfName)
 {
-    _alpha = 0.4;
-    _beta = 0.2;
+    //_alpha = 0.4;
+    //_beta = 0.1;
     _orialpha = a;
     parseBlock(bfName);
     parseNet(nfName);
@@ -121,6 +121,16 @@ double Floorplanner::HPWL()
     return val;
 }
 
+void Floorplanner::flip()
+{
+    for (int i = 0; i < _nBlock; ++i) {
+        Block* b = _blocks[i];
+        swap(b->leftdown.first, b->leftdown.second);
+        swap(b->width, b->height);
+    }
+    swap(_curH, _curW);
+}
+
 void Floorplanner::initNorm(int times)
 {   
     _normA = _normW = 0;
@@ -134,24 +144,60 @@ void Floorplanner::initNorm(int times)
     _normW /= times;
 }
 
+bool Floorplanner::isfit()
+{
+    double H = _curH, W = _curW;
+    double fpH = _height, fpW = _width;
+    if (W < H) swap(W, H);
+    if (fpW < fpH) swap(fpW, fpH);
+
+    if (H <= fpH && W <= fpW) return true;
+    else return false;
+}
+
 double Floorplanner::Cost()
 {
     double H = _curH, W = _curW;
     double fpH = _height, fpW = _width;
-    //if (W < H) swap(W, H);
-    //if (fpW < fpH) swap(fpW, fpH);
+    if (W < H) swap(W, H);
+    if (fpW < fpH) swap(fpW, fpH);
     
     double dR = H / W - fpH / fpW;
     double a = _alpha;
     double b = _beta;
     //return a * _curA / _normA + (1 - a) * HPWL() / _normW;
+    //return a * _curA / _normA + b * HPWL() / _normW + (1 - a - b) * fabs(dR);
     return a * _curA / _normA + b * HPWL() / _normW + (1 - a - b) * dR * dR;
+}
+
+void Floorplanner::outfile(string& fileName, double runtime)
+{
+    ofstream of;
+    of.open(fileName, ofstream::out);
+
+    if (!of.is_open()) {
+        cerr << "Error: Open output file failed..." << endl;
+    }
+
+    of << orialpha() * curA() / _normA
+            + (1 - orialpha()) * curW() / _normW << endl;
+    of << HPWL() << endl;
+    of << curA() << endl;
+    of << curW() << curH() << endl;
+    of << runtime << endl;
+    for (int i = 0; i < _nBlock; ++i) {
+        Block* b = _blocks[i];
+        of << b->name << ' '
+            << b->leftdown.first << ' ' << b->leftdown.second << ' '
+            << b->leftdown.first + b->width << ' '
+            << b->leftdown.second + b->height << endl;
+    }
 }
 
 void Floorplanner::gnuplot()
 {
     Gnuplot gplt;
-    double xr = 2 * _width, yr = 2 * _height;
+    double xr = 1.2 * max(_width, _height), yr = xr;
     gplt << "set xrange [" << 0 << ":" << xr << "]" << endl;
     gplt << "set yrange [" << 0 << ":" << yr << "]" << endl;
     gplt << "set size ratio -1" << endl;
