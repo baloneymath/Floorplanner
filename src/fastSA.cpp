@@ -18,7 +18,7 @@ FastSA::FastSA()
     N = 0; // how many tries per iteration
     alpha = 0;
     alpha_base = 0.5;
-    beta = 0.;
+    beta = 0.1;
     fplans = 0;
     f_fplans = 0;
     avgUphill = 0;
