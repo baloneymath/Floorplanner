@@ -69,7 +69,7 @@ void FastSA::simulate(Floorplanner& fp)
     // start SA
     ORI_T = -avgUphill / log(P);
     T = ORI_T;
-    while (T > T_LOWER_BOUND) {
+    while (1) {
         ++fplans;
         #ifdef _DETAIL_
         cout << "fplans: " << fplans << endl;
@@ -115,7 +115,7 @@ void FastSA::simulate(Floorplanner& fp)
         cout << "Current Cost: " << fp.getCurResult().cost << endl;
         cout << endl;
         #endif
-        if ((double)reject / N > 0.99) {
+        if ((double)reject / N > 0.98 || T < T_LOWER_BOUND) {
             if (f_fplans > 0) break;
             else {
                 T = ORI_T;
