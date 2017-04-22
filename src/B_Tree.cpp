@@ -163,8 +163,12 @@ void B_Tree::perturb()
                 break;
             }
         case 2:
-            swapNode(_nodes[getRand()], _nodes[getRand()]);
-            break;
+            {
+                int c = getRand(), p = getRand();
+                while (p == c) p = getRand();
+                swapNode(_nodes[c], _nodes[p]);
+                break;
+            }
     }
 }
 
@@ -195,61 +199,37 @@ void B_Tree::insertNode(Node* parent, Node* n)
 
 void B_Tree::deleteNode(Node* n)
 {
-    int child = NIL, sibling = NIL, descendant = NIL;
-    if (!n->isleaf()) {
-        bool pickleft = getRand() % 2;
-        if (n->left == NIL) pickleft = false; // make sure not NIL
-        if (n->right == NIL) pickleft = true;
-        if (pickleft) {
-            child = n->left;
-            if (n->right != NIL) {
-                descendant = _nodes[n->left]->right;
-                sibling = n->right;
-                _nodes[n->right]->parent = n->left;
-                _nodes[n->left]->right = n->right;
-            }
-            _nodes[n->left]->parent = n->parent;
-        }
+    if (n->isleaf()) {
+        if (n->id == _nodes[n->parent]->left)
+            _nodes[n->parent]->left = NIL;
+        else _nodes[n->parent]->right = NIL;
+        n->left = n->right = n->parent = NIL;
+    }
+    else if (n->left != NIL && n->right == NIL) {
+        _nodes[n->left]->parent = n->parent;
+        if (n->parent == NIL) _root = _nodes[n->left];
         else {
-            child = n->right;
-            if (n->left != NIL) {
-                descendant = _nodes[n->right]->left;
-                sibling = n->left;
-                _nodes[n->left]->parent = n->right;
-                _nodes[n->right]->left = n->left;
-            }
-            _nodes[n->right]->parent = n->parent;
+            if (n->id == _nodes[n->parent]->left)
+                _nodes[n->parent]->left = n->left;
+            else _nodes[n->parent]->right = n->left;
         }
+        n->left = n->right = n->parent = NIL;
     }
-    if (n->parent == NIL) _root = _nodes[child];
+    else if (n->left == NIL && n->right != NIL) {
+        _nodes[n->right]->parent = n->parent;
+        if (n->parent == NIL) _root = _nodes[n->right];
+        else {
+            if (n->id == _nodes[n->parent]->left)
+                _nodes[n->parent]->left = n->right;
+            else _nodes[n->parent]->right = n->right;
+        }
+        n->left = n->right = n->parent = NIL;
+    }
     else {
-        if (n->id == _nodes[n->parent]->left) {
-            _nodes[n->parent]->left = child;
-        }
-        else _nodes[n->parent]->right = child;
-    }
-    if (descendant != NIL) {
-        Node* d = _nodes[descendant];
-        while (1) {
-            Node* p = _nodes[sibling];
-            if (p->left == NIL && p->right == NIL) {
-                d->parent = p->id;
-                if (getRand() % 2) p->left = d->id;
-                else p->right = d->id;
-                break;
-            }
-            else if (p->left == NIL) {
-                d->parent = p->id;
-                p->left = d->id;
-                break;
-            }
-            else if (p->right == NIL) {
-                d->parent = p->id;
-                p->right = d->id;
-                break;
-            }
-            else sibling = getRand() % 2? p->left : p->right;
-        }
+        bool pickleft = rand() % 2;
+        if (pickleft) swapNode(n, _nodes[n->left]);
+        else swapNode(n, _nodes[n->right]);
+        deleteNode(n);
     }
 }
 

@@ -1,6 +1,6 @@
 # CC and CFLAGS are varilables
 CC = g++
-CFLAGS = -c -std=c++11 
+CFLAGS = -c -std=c++11
 BOOSTFLAGS = -lutil -lboost_iostreams -lboost_system -lboost_filesystem
 AR = ar
 ARFLAGS = rcv

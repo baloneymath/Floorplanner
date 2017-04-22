@@ -5,6 +5,8 @@
 *******************************************/
 #include "fastSA.h"
 
+#define _DETAIL_
+
 FastSA::FastSA()
 {
     T = 0, ORI_T = 0;
@@ -15,9 +17,9 @@ FastSA::FastSA()
     initN = 0; // inital perturbs
     N = 0; // how many tries per iteration
     alpha = 0;
-    alpha_base = 0.3;
+    alpha_base = 0.5;
     beta = 0.;
-    fplans = 1;
+    fplans = 0;
     f_fplans = 0;
     avgUphill = 0;
     avgCost = 0;
@@ -55,12 +57,10 @@ void FastSA::simulate(Floorplanner& fp)
     cout << "Start SA..." << endl;
     double oriArea = fp.curA();
     
-    alpha_base = fp.orialpha();
     alpha = alpha_base;
     fp.setalpha(alpha);
     fp.setbeta(beta);
-    cerr << "alpha_base: " << alpha_base << endl;
-
+    
     initN = 20 * fp.nBlock();
     N     = 5 * fp.nBlock();
 
@@ -69,17 +69,16 @@ void FastSA::simulate(Floorplanner& fp)
     // start SA
     ORI_T = -avgUphill / log(P);
     T = ORI_T;
-    cerr << "Init T: " << T << endl;
-    
     while (T > T_LOWER_BOUND) {
         ++fplans;
-        cerr << "fplans: " << fplans << endl;
-        cerr << "f_fplans: " << f_fplans << endl;
+        #ifdef _DETAIL_
+        cout << "fplans: " << fplans << endl;
+        cout << "f_fplans: " << f_fplans << endl;
+        #endif
         double cost = 0;
         avgCost = 0;
         int reject = 0;
         for (int i = 0; i < N; ++i) {
-            //f_fplans = 0;
             fp.perturb();
             fp.pack();
             cost = fp.Cost();
@@ -89,10 +88,9 @@ void FastSA::simulate(Floorplanner& fp)
             if (dcost < 0 || (double)(rand() % 100 + 1) / 100 <= P) {
                 fp.keepCurResult();
                 if (cost < fp.getBestResult().cost) {
-                    fp.keepBestResult();
                     if (fp.isfit()) {
+                        fp.keepBestResult();
                         ++f_fplans;
-                        //fp.gnuplot();
                     }
                     alpha = alpha_base + (1 - alpha_base) * f_fplans / N;
                     fp.setalpha(alpha);
@@ -104,22 +102,35 @@ void FastSA::simulate(Floorplanner& fp)
             }
         }
         avgCost /= N;
+        
         if (2 <= fplans && fplans < K) {
             T = ORI_T * avgCost / fplans / C;
         }
         else T = ORI_T * avgCost / fplans;
        
-        cerr << "alpha: " << alpha << endl;
-        cerr << "P: " << P << " T: " << T << endl;
-        cerr << "Current Cost: " << fp.getCurResult().cost << endl;
-        //cerr << "Reject %: " << (double)reject / N  << endl;
-        if ((double)reject / N > 0.99)  break;
+        #ifdef _DETAIL_
+        cout << "alpha: " << alpha << endl;
+        cout << "P: " << P << " T: " << T << endl;
+        cout << "Reject %: " << (double)reject / N  << endl;
+        cout << "Current Cost: " << fp.getCurResult().cost << endl;
+        cout << endl;
+        #endif
+        if ((double)reject / N > 0.99) {
+            if (f_fplans > 0) break;
+            else {
+                T = ORI_T;
+                P = 0.99;
+                fplans = 0;
+                alpha = alpha_base;
+            }
+        }
 
     }
     fp.recoverBest();
     fp.pack();
-    cerr << "Origi Area: " << oriArea << endl;
-    cerr << "Final Area: " << fp.curA() << endl;
+    
+    cout << "Origi Area: " << oriArea << endl;
+    cout << "Final Area: " << fp.curA() << endl;
     cout << "Finish SA..." << endl;
 
 }
