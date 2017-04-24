@@ -128,10 +128,10 @@ void Floorplanner::flip()
         swap(b->leftdown.first, b->leftdown.second);
         swap(b->width, b->height);
     }
-    for (int i = 0; i < _nTerminal; ++i) {
-        Terminal* t = _terminals[i];
-        swap(t->loc.first, t->loc.second);
-    }
+   // for (int i = 0; i < _nTerminal; ++i) {
+   //     Terminal* t = _terminals[i];
+   //     swap(t->loc.first, t->loc.second);
+   // }
     swap(_curH, _curW);
 }
 
@@ -170,8 +170,8 @@ double Floorplanner::Cost()
     double a = _alpha;
     double b = _beta;
     //return a * _curA / _normA + (1 - a) * HPWL() / _normW;
-    //return a * _curA / _normA + b * HPWL() / _normW + (1 - a - b) * fabs(dR);
-    return a * _curA / _normA + b * HPWL() / _normW + (1 - a - b) * dR * dR;
+    return a * _curA / _normA + b * HPWL() / _normW 
+            + (1 - a - b) * dR * dR;
 }
 
 void Floorplanner::outfile(string& fileName, double runtime)
@@ -186,7 +186,7 @@ void Floorplanner::outfile(string& fileName, double runtime)
     of << orialpha() * curA() + (1 - orialpha()) * curW() << endl;
     of << HPWL() << endl;
     of << curA() << endl;
-    of << curW() << curH() << endl;
+    of << curW() << " " << curH() << endl;
     of << runtime << endl;
     for (int i = 0; i < _nBlock; ++i) {
         Block* b = _blocks[i];
