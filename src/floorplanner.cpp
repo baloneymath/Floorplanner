@@ -128,10 +128,6 @@ void Floorplanner::flip()
         swap(b->leftdown.first, b->leftdown.second);
         swap(b->width, b->height);
     }
-   // for (int i = 0; i < _nTerminal; ++i) {
-   //     Terminal* t = _terminals[i];
-   //     swap(t->loc.first, t->loc.second);
-   // }
     swap(_curH, _curW);
 }
 
@@ -190,10 +186,12 @@ void Floorplanner::outfile(string& fileName, double runtime)
     of << runtime << endl;
     for (int i = 0; i < _nBlock; ++i) {
         Block* b = _blocks[i];
+        double x = b->width, y = b->height;
+        if (b->rotate) swap(x, y);
         of << b->name << ' '
             << b->leftdown.first << ' ' << b->leftdown.second << ' '
-            << b->leftdown.first + b->width << ' '
-            << b->leftdown.second + b->height << endl;
+            << b->leftdown.first + x << ' '
+            << b->leftdown.second + y << endl;
     }
 }
 
@@ -201,8 +199,8 @@ void Floorplanner::gnuplot()
 {
     Gnuplot gplt;
     double xr = 1.2 * max(_width, _height), yr = xr;
-    gplt << "set xrange [" << 0 << ":" << xr << "]" << endl;
-    gplt << "set yrange [" << 0 << ":" << yr << "]" << endl;
+    gplt << "set xrange [" << -0.1*xr << ":" << xr << "]" << endl;
+    gplt << "set yrange [" << -0.1*yr << ":" << yr << "]" << endl;
     gplt << "set size ratio -1" << endl;
     gplt << "set object 1 rect from 0,0 to " << _height
          << "," << _width << "fc rgb \"#CCFFFF\" back" << endl;
@@ -222,6 +220,12 @@ void Floorplanner::gnuplot()
              << b->leftdown.second << " to "
              << b->leftdown.first + w << ","
              << b->leftdown.second + h << " fc rgb \"green\" " << endl;
+    }
+    for (int i = 0; i < _nTerminal; ++i) {
+        Terminal* t = _terminals[i];
+        gplt << " set object " << i + 3 + _nBlock << " circle at "
+             << t->loc.first << "," << t->loc.second
+             << " size scr 0.01 fc rgb \"navy\"" << endl;
     }
     //gplt << " plot \'-\' w p ls 1" << endl;
     gplt << " plot \'-\' using 1:2 t \"\" with line" << endl;
