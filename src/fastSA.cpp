@@ -5,7 +5,7 @@
 *******************************************/
 #include "fastSA.h"
 
-//#define _DETAIL_
+#define _DETAIL_
 
 template<typename T, typename U>
 void plot_2d(vector<T>& data, vector<U> axis, bool logscale, uint limit) {

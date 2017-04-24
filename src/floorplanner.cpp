@@ -170,7 +170,7 @@ double Floorplanner::Cost()
     double a = _alpha;
     double b = _beta;
     //return a * _curA / _normA + (1 - a) * HPWL() / _normW;
-    return a * _curA / _normA + b * HPWL() / _normW 
+    return a * _curA / _normA //+ b * HPWL() / _normW 
             + (1 - a - b) * dR * dR;
 }
 
@@ -183,7 +183,7 @@ void Floorplanner::outfile(string& fileName, double runtime)
         cerr << "Error: Open output file failed..." << endl;
     }
 
-    of << orialpha() * curA() + (1 - orialpha()) * curW() << endl;
+    of << orialpha() * curA() + (1 - orialpha()) * HPWL() << endl;
     of << HPWL() << endl;
     of << curA() << endl;
     of << curW() << " " << curH() << endl;
