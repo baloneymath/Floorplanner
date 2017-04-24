@@ -92,15 +92,15 @@ void Floorplanner::parseNet(string& nfName)
 
 double Floorplanner::HPWL()
 {
-    double val = 0;
+    double val = 0.;
     for (int i = 0; i < _nNet; ++i) {
         double left = DBL_MAX;
         double right = DBL_MIN;
         double down = DBL_MAX;
-        double top = 0.;
+        double top = DBL_MIN;
         for (auto& str : _nets[i]->pins) {
             int pos = 0;
-            double x = 0, y = 0;
+            double x = 0., y = 0.;
             if (_blocksMap[str]) {
                 pos = _blocksMap[str];
                 x = _blocks[pos]->center().first;
@@ -109,7 +109,7 @@ double Floorplanner::HPWL()
             else {
                 pos = _terminalsMap[str];
                 x = _terminals[pos]->loc.first;
-                x = _terminals[pos]->loc.second;
+                y = _terminals[pos]->loc.second;
             }
             left = min(left, x);
             right = max(right, x);
@@ -179,7 +179,8 @@ void Floorplanner::outfile(string& fileName, double runtime)
         cerr << "Error: Open output file failed..." << endl;
     }
 
-    of << orialpha() * curA() + (1 - orialpha()) * HPWL() << endl;
+    of << setprecision(10)
+       << orialpha() * curA() + (1 - orialpha()) * HPWL() << endl;
     of << HPWL() << endl;
     of << curA() << endl;
     of << curW() << " " << curH() << endl;

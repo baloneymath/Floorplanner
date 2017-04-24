@@ -27,7 +27,7 @@ int main(int argc, char* argv[])
     bt.pack();
     cout << "Area: " << bt.curA() << " HPWL:" << bt.HPWL() << endl;
     bt.gnuplot();
-   
+ 
     FastSA sa;
     sa.simulate(bt);
    
