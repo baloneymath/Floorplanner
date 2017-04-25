@@ -74,11 +74,11 @@ void Floorplanner::parseNet(string& nfName)
             for (int i = 0; i < deg; ++i) {
                 nf >> buf;
                 p.push_back(buf);
-                if (_blocksMap[buf]) {
+                if (_blocksMap.count(buf)) {
                     Block* b = _blocks[_blocksMap[buf]];
                     b->nets.push_back(id);
                 }
-                else if (_terminalsMap[buf]) {
+                else {
                     Terminal* t = _terminals[_terminalsMap[buf]];
                     t->nets.push_back(id);
                 }
@@ -101,7 +101,7 @@ double Floorplanner::HPWL()
         for (auto& str : _nets[i]->pins) {
             int pos = 0;
             double x = 0., y = 0.;
-            if (_blocksMap[str]) {
+            if (_blocksMap.count(str)) {
                 pos = _blocksMap[str];
                 x = _blocks[pos]->center().first;
                 y = _blocks[pos]->center().second;
