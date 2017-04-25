@@ -1,6 +1,6 @@
 /*******************************************
 * Author: Hao Chen <b03901016@ntu.edu.tw>  *
-* Last Modified: 2017/04/09                *
+* Last Modified: 2017/04/26                *
 * CXXFLAGS: c++11                          *
 *******************************************/
 #ifndef _FLOORPLANNER_H
@@ -56,7 +56,7 @@ struct Block {
         leftdown = b.leftdown;
         nets = b.nets;
     }
-    Block(string n = "", int w = 0, int h = 0, 
+    Block(string n = "", double w = 0, double h = 0, 
         bool r = 0, Location loc = make_pair(-1, -1)):
         name(n), width(w), height(h), rotate(r), leftdown(loc) {}
     

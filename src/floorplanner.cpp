@@ -1,6 +1,6 @@
 /*******************************************
 * Author: Hao Chen <b03901016@ntu.edu.tw>  *
-* Last Modified: 2017/04/09                *
+* Last Modified: 2017/04/29                *
 * CXXFLAGS: c++11                          *
 *******************************************/
 #include "floorplanner.h"
@@ -34,7 +34,7 @@ void Floorplanner::parseBlock(string& bfName)
     // macros
     for (int i = 0; i < _nBlock; ++i) {
         string n;
-        int w, h;
+        double w, h;
         bf >> n; bf >> w; bf >> h;
         Block* b = new Block(n, w, h);
         _blocks[i] = b;
@@ -43,7 +43,7 @@ void Floorplanner::parseBlock(string& bfName)
     // terminals
     for (int i = 0; i < _nTerminal; ++i) {
         string n;
-        int x, y;
+        double x, y;
         bf >> n; bf >> buf; bf >> x; bf >> y;
         Terminal* t = new Terminal(n, make_pair(x, y));
         _terminals[i] = t;
@@ -203,10 +203,12 @@ void Floorplanner::gnuplot()
     gplt << "set xrange [" << -0.1*xr << ":" << xr << "]" << endl;
     gplt << "set yrange [" << -0.1*yr << ":" << yr << "]" << endl;
     gplt << "set size ratio -1" << endl;
-    gplt << "set object 1 rect from 0,0 to " << _height
-         << "," << _width << "fc rgb \"#CCFFFF\" back" << endl;
+   // gplt << "set object 1 rect from 0,0 to " << _height
+   //      << "," << _width << "fc rgb \"#CCFFFF\" back" << endl;
+   // gplt << "set object 2 rect from 0,0 to " << _width
+   //      << "," << _height << "fc rgb \"#FFFF99\" back" << endl;
     gplt << "set object 2 rect from 0,0 to " << _width
-         << "," << _height << "fc rgb \"#FFFF99\" back" << endl;
+         << "," << _height << "fc rgb \"#CCFFFF\" back" << endl;
     for (int i = 0; i < _nBlock; ++i) {
         Block* b = _blocks[i];
         if (b->leftdown == make_pair(-1., -1.)) continue;

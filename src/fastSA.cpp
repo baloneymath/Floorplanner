@@ -1,11 +1,11 @@
 /*******************************************
 * Author: Hao Chen <b03901016@ntu.edu.tw>  *
-* Last Modified: 2017/04/09                *
+* Last Modified: 2017/04/29                *
 * CXXFLAGS: c++11                          *
 *******************************************/
 #include "fastSA.h"
 
-#define _DETAIL_
+//#define _DETAIL_
 
 template<typename T, typename U>
 void plot_2d(vector<T>& data, vector<U> axis, bool logscale, uint limit) {
