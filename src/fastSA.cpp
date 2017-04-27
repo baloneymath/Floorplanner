@@ -5,7 +5,7 @@
 *******************************************/
 #include "fastSA.h"
 
-//#define _DETAIL_
+#define _DETAIL_
 
 template<typename T, typename U>
 void plot_2d(vector<T>& data, vector<U> axis, bool logscale, uint limit) {
@@ -136,7 +136,8 @@ void FastSA::simulate(Floorplanner& fp)
         cout << "Current Cost: " << fp.getCurResult().cost << endl;
         cout << endl;
         #endif
-        if ((double)reject / N > 0.985 || T < T_LOWER_BOUND) {
+        if ((double)reject / N > 0.985 || T < T_LOWER_BOUND
+            || fplans > 20 * fp.nBlock()) {
             if (f_fplans > 0) break;
             else {
                 T = ORI_T;
